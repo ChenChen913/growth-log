@@ -255,7 +255,7 @@ function buildWeekCard(w, num, delay) {
       <div class="pill-item"><div class="pill-val">${numFmt(w.shares)}</div><div class="pill-lbl">分享数</div></div>
     </div>
     <div class="expand-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
-    <div class="week-card-actions" onclick="event.stopPropagation()"><button class="edit-btn" onclick="openEditWeekModal(${w._ts})">编辑</button></div>
+    <div class="week-card-actions" onclick="event.stopPropagation()"><button class="edit-btn" onclick="openEditWeekModal(${w._ts})">编辑</button><button class="del-btn" onclick="deleteWeek(${w._ts})">删除</button></div>
   </div>
   <div class="week-body"><div class="body-grid"><div><div class="col-label">内容发布构成</div><div class="ct-list">${ctBars}</div></div><div><div class="col-label">阅读来源占比</div><div class="source-layout"><div class="donut-wrap"><canvas id="donut-${w._ts}"></canvas></div><div class="src-legend">${srcLegend}</div></div></div></div>${noteHtml}</div>
 </div>`;
@@ -309,6 +309,7 @@ function saveWeek() {
   const label = document.getElementById('w_label').value.trim();
   if (!label) { alert('请填写周期名称'); return; }
   const n  = id => parseInt(document.getElementById(id).value) || 0;
+  const f  = id => { const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? 0 : Math.round(v * 10) / 10; };
   const wdate = document.getElementById('w_date').value;
   const sortTs = wdate ? new Date(wdate).getTime() : Date.now();
   weeks.push({ 
@@ -316,7 +317,7 @@ function saveWeek() {
     range: document.getElementById('w_range').value.trim(), wdate, 
     reads: n('w_reads'), shares: n('w_shares'), fans: n('w_fans'), newfans: parseInt(document.getElementById('w_newfans').value) || 0, 
     article: n('w_article'), imgtext: n('w_imgtext'), video: n('w_video'), audio: n('w_audio'), 
-    s1: n('w_s1'), s2: n('w_s2'), s3: n('w_s3'), s4: n('w_s4'), s5: n('w_s5'), s6: n('w_s6'), s7: n('w_s7'), 
+    s1: f('w_s1'), s2: f('w_s2'), s3: f('w_s3'), s4: f('w_s4'), s5: f('w_s5'), s6: f('w_s6'), s7: f('w_s7'), 
     note: document.getElementById('w_note').value.trim() 
   });
   persist(); closeWeekModal(); renderOverview();
@@ -347,16 +348,27 @@ function updateWeek() {
   const ts = parseInt(document.getElementById('ew_ts').value); const idx = weeks.findIndex(x => x._ts === ts);
   if (idx === -1) { alert('找不到该记录'); return; }
   const label = document.getElementById('ew_label').value.trim(); if (!label) { alert('请填写周期名称'); return; }
-  const n = id => parseInt(document.getElementById(id).value) || 0; const wdate = document.getElementById('ew_date').value;
+  const n = id => parseInt(document.getElementById(id).value) || 0;
+  const f = id => { const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? 0 : Math.round(v * 10) / 10; };
+  const wdate = document.getElementById('ew_date').value;
   weeks[idx] = { 
     ...weeks[idx], label, wdate, _sortTs: wdate ? new Date(wdate).getTime() : weeks[idx]._sortTs, 
     range: document.getElementById('ew_range').value.trim(), 
     reads: n('ew_reads'), shares: n('ew_shares'), fans: n('ew_fans'), newfans: parseInt(document.getElementById('ew_newfans').value) || 0, 
     article: n('ew_article'), imgtext: n('ew_imgtext'), video: n('ew_video'), audio: n('ew_audio'), 
-    s1: n('ew_s1'), s2: n('ew_s2'), s3: n('ew_s3'), s4: n('ew_s4'), s5: n('ew_s5'), s6: n('ew_s6'), s7: n('ew_s7'), 
+    s1: f('ew_s1'), s2: f('ew_s2'), s3: f('ew_s3'), s4: f('ew_s4'), s5: f('ew_s5'), s6: f('ew_s6'), s7: f('ew_s7'), 
     note: document.getElementById('ew_note').value.trim() 
   };
   persist(); closeEditWeekModal(); renderOverview(); drawnDonuts.delete(ts); renderWeekList();
+  if (document.getElementById('panel-weeks').classList.contains('active')) renderTrendLine();
+}
+
+/* 周报删除：与 deleteArticle 对称，墓碑防多端复活 */
+function deleteWeek(ts) {
+  if (!confirm('确认删除这条周报记录？')) return;
+  weeks = weeks.filter(w => w._ts !== ts);
+  addTombstone(ts);
+  persist(); renderWeekList(); renderOverview();
   if (document.getElementById('panel-weeks').classList.contains('active')) renderTrendLine();
 }
 
@@ -471,7 +483,9 @@ function clearArticleSearch() {
 }
 
 function addTombstone(ts) {
+  if (!ts) return;   // 防御：空值不入墓碑
   window.__GLOG_TOMB__ = window.__GLOG_TOMB__ || [];
+  if (window.__GLOG_TOMB__.includes(ts)) return;   // 去重
   window.__GLOG_TOMB__.push(ts);
   if (window.__GLOG_TOMB__.length > 300) window.__GLOG_TOMB__.splice(0, window.__GLOG_TOMB__.length - 300);
 }
