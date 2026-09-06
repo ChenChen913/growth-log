@@ -45,7 +45,7 @@ create or replace function public.sync_get(p_code text)
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions   -- Supabase 默认把 pgcrypto 装在 extensions schema
 as $$
 declare
   result jsonb;
@@ -66,7 +66,7 @@ create or replace function public.sync_save(p_code text, p_payload jsonb)
 returns timestamptz
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions   -- Supabase 默认把 pgcrypto 装在 extensions schema
 as $$
 declare
   new_ts timestamptz;

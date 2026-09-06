@@ -1,16 +1,14 @@
 /* ═══════════════════════════════════════════════════════
    公众号成长日志 · 配置文件
    ─────────────────────────────────────────────────────
-   【本地模式】两个值都留空 → 数据只存当前设备浏览器
-   【云端同步】填入你的 Supabase 项目信息（见 DEPLOY.md）：
-     1. 登录 https://supabase.com 创建项目
-     2. SQL Editor 中执行 sql/setup.sql
-     3. 项目设置 → API 中复制下面两个值：
-
-   SUPABASE_URL      → Project URL，形如 https://xxxxx.supabase.co
-   SUPABASE_ANON_KEY → Project API Keys 中的 anon / public 密钥
+   【云端同步】已启用 ✓
+     数据存储在用户自己的 Supabase 项目中：
+     · 访问需输入口令（bcrypt 哈希校验，口令明文不落库）
+     · 表已启用 RLS，anon/publishable 密钥无法直接读写
+     · publishable key 为 Supabase 设计上的公开密钥，泄露无风险
+   【改回本地模式】把下面两个值清空即可。
    ═══════════════════════════════════════════════════════ */
 window.APP_CONFIG = {
-  SUPABASE_URL: '',
-  SUPABASE_ANON_KEY: ''
+  SUPABASE_URL: 'https://khofojhgphxtttgapzfn.supabase.co',
+  SUPABASE_ANON_KEY: 'sb_publishable_scaPszTmODCglHcWFOurcQ_Hmv9_ing'
 };
