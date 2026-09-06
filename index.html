@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>公众号成长日志</title>
+<meta name="description" content="公众号运营成长日志：文章记录、周报数据、趋势图表、月度年度汇总，手机电脑云端同步。">
+<meta name="theme-color" content="#07C160">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="成长日志">
+<link rel="stylesheet" href="./css/style.css">
+<script src="./vendor/chart.umd.min.js"></script>
+<script src="./js/config.js"></script>
+</head>
+<body>
+<!-- AMBIENT ORBS -->
+<div class="bg-orbs"><div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div></div>
+
+<!-- ══ HEADER ══ -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-avatar-wrap" onclick="document.getElementById('avatarInput').click()">
+        <div class="logo-avatar-default" id="avatarDefault">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12zM6 10h2v2H6zm0 4h8v2H6zm10 0h2v2h-2zm-6-4h8v2h-8z"/></svg>
+        </div>
+        <img class="logo-avatar" id="avatarImg" src="" alt="公众号头像" style="display:none;">
+        <div class="upload-hint">上传头像</div>
+      </div>
+      <input type="file" id="avatarInput" accept="image/*">
+      <div class="logo-text">
+        <div class="logo-name">公众号成长日志</div>
+        <div class="logo-tagline">记录每一周的成长与沉淀</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="sync-badge" id="syncBadge" data-state="local"><span class="sync-dot"></span><span class="sync-text" id="syncText">…</span></div>
+      <button class="btn btn-ghost" onclick="openWeekModal()">记录本周数据</button>
+      <button class="btn btn-primary" onclick="openArticleModal()">记录文章</button>
+    </div>
+  </div>
+</header>
+
+<!-- ══ MAIN ══ -->
+<main class="page">
+  <div class="tabs-wrap">
+    <button class="tab active" onclick="switchTab('overview', this)">数据总览</button>
+    <button class="tab" onclick="switchTab('articles', this)">文章记录</button>
+    <button class="tab" onclick="switchTab('weeks', this)">周报告</button>
+    <button class="tab" onclick="switchTab('monthly', this)">月度年度</button>
+  </div>
+
+  <!-- ══ PANEL: OVERVIEW ══ -->
+  <div class="panel active" id="panel-overview">
+    <div class="stats-hero">
+      <div class="stat-hero-card accent"><div class="stat-label">累计总阅读</div><div class="stat-value" id="s-reads">0</div><div class="stat-sub">所有周合计</div></div>
+      <div class="stat-hero-card"><div class="stat-label">已记录文章</div><div class="stat-value" id="s-articles">0</div><div class="stat-sub">条内容记录</div></div>
+      <div class="stat-hero-card"><div class="stat-label">累计分享</div><div class="stat-value" id="s-shares">0</div><div class="stat-sub">次分享合计</div></div>
+      <div class="stat-hero-card"><div class="stat-label">已记录周数</div><div class="stat-value" id="s-weeks">0</div><div class="stat-sub">周报告</div></div>
+    </div>
+
+    <div class="layout-cols">
+      <!-- 左列：图表区 -->
+      <div>
+        <div class="chart-card">
+          <div class="chart-head">
+            <span class="chart-title">内容类型分布</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="chart-meta">所有文章统计</span>
+              <div style="display:flex;gap:4px;background:rgba(0,0,0,0.05);border-radius:8px;padding:3px;">
+                <button id="typeChartBar" onclick="switchTypeChart('bar')" style="padding:4px 12px;border:none;border-radius:6px;font-size:12px;cursor:pointer;background:white;color:var(--ink-mid);box-shadow:0 1px 4px rgba(0,0,0,0.1);transition:all 0.18s;">柱状图</button>
+                <button id="typeChartPie" onclick="switchTypeChart('pie')" style="padding:4px 12px;border:none;border-radius:6px;font-size:12px;cursor:pointer;background:transparent;color:var(--ink-light);transition:all 0.18s;">饼图</button>
+              </div>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="typeChart"></canvas></div>
+        </div>
+
+        <!-- AI使用占比统计图 -->
+        <div class="chart-card">
+          <div class="chart-head">
+            <span class="chart-title">AI 辅助创作占比</span>
+            <span class="chart-meta">基于已记录文章</span>
+          </div>
+          <div class="chart-wrap"><canvas id="aiChart"></canvas></div>
+        </div>
+      </div>
+      
+      <!-- 右列：数据管理 -->
+      <div>
+        <div class="side-card">
+          <div class="side-title">各类型累计</div>
+          <div id="typeSummary"></div>
+        </div>
+        <div class="export-card">
+          <div class="export-title">数据管理</div>
+          <div class="export-desc">生成精美数据卡片分享，或导出/导入本地JSON备份文件。</div>
+          <div class="export-btns">
+            <button class="btn-export" onclick="exportCard()">导出数据卡片</button>
+            <button class="btn-export" onclick="exportDetailedData()" style="background:linear-gradient(135deg,#059952 0%,#047a42 100%);">导出详细数据</button>
+            <button class="btn-export-ghost" onclick="exportData()">导出 JSON 备份</button>
+            <button class="btn-export-ghost" onclick="triggerImport()" style="border-color:rgba(7,193,96,0.35);color:rgba(255,255,255,0.8);">导入历史数据</button>
+            <button class="btn-export-ghost" id="demoDataBtn" onclick="loadDemoData()">载入演示数据</button>
+            <button class="btn-export-ghost btn-export-danger" id="logoutBtn" onclick="Store.logout()" style="display:none;">退出云端会话</button>
+            <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importData(event)">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PANEL: ARTICLES ══ -->
+  <div class="panel" id="panel-articles">
+    <div class="article-toolbar">
+      <div class="filter-pills">
+        <button class="filter-pill active" onclick="filterArticles('all', this)">全部</button>
+        <button class="filter-pill" onclick="filterArticles('article', this)">文章</button>
+        <button class="filter-pill" onclick="filterArticles('imgtext', this)">图文</button>
+        <button class="filter-pill" onclick="filterArticles('video', this)">视频</button>
+        <button class="filter-pill" onclick="filterArticles('audio', this)">音频</button>
+      </div>
+      <button class="btn btn-primary" onclick="openArticleModal()">记录文章</button>
+    </div>
+    <div class="article-searchbar">
+      <input class="search-input" id="articleSearch" type="text" placeholder="搜索文章标题…">
+      <div class="search-date"><label>从</label><input type="date" id="articleFrom"><label>到</label><input type="date" id="articleTo"></div>
+      <select class="search-sort" id="articleSort">
+        <option value="time_desc">最新发布优先</option>
+        <option value="time_asc">最早发布优先</option>
+        <option value="title_asc">标题 A → Z</option>
+      </select>
+      <button class="search-clear" onclick="clearArticleSearch()">重置</button>
+    </div>
+    <div class="result-chip" id="articleCount"></div>
+    <div class="article-table-wrap">
+      <div class="table-head">
+        <div>文章标题</div><div>类型</div><div>原创</div><div>AI参与</div><div>发布时间</div><div>操作</div>
+      </div>
+      <div id="articleTableBody"></div>
+    </div>
+  </div>
+
+  <!-- ══ PANEL: WEEKS ══ -->
+  <div class="panel" id="panel-weeks">
+    <div class="week-section-head">
+      <div class="section-title">周报告记录</div>
+      <button class="btn btn-ghost" onclick="openWeekModal()">记录本周数据</button>
+    </div>
+    <div class="trend-panel">
+      <div class="trend-header">
+        <div class="trend-title">数据趋势折线图</div>
+        <div class="trend-controls">
+          <div class="ctrl-group" id="metricGroup">
+            <button class="ctrl-btn active" onclick="setMetric('reads',this)">阅读量</button>
+            <button class="ctrl-btn" onclick="setMetric('fans',this)">粉丝量</button>
+            <button class="ctrl-btn" onclick="setMetric('shares',this)">分享数</button>
+            <button class="ctrl-btn" onclick="setMetric('content',this)">内容数</button>
+          </div>
+          <div class="ctrl-divider" style="height:28px;width:1px;background:rgba(0,0,0,0.08);"></div>
+          <div class="ctrl-group" id="rangeGroup">
+            <button class="ctrl-btn active" onclick="setRange('7',this)">近7天</button>
+            <button class="ctrl-btn" onclick="setRange('30',this)">近30天</button>
+            <button class="ctrl-btn" onclick="setRange('all',this)">全部</button>
+            <button class="ctrl-btn" onclick="setRange('custom',this)">自定义</button>
+          </div>
+        </div>
+      </div>
+      <div class="trend-custom-range" id="trendCustomRange">
+        <label>从</label><input type="date" id="trendFrom" oninput="renderTrendLine()">
+        <label>到</label><input type="date" id="trendTo" oninput="renderTrendLine()">
+      </div>
+      <div class="trend-body"><div class="trend-chart-wrap"><canvas id="trendLineChart"></canvas></div></div>
+    </div>
+    <div id="weekList"></div>
+  </div>
+
+  <!-- ══ PANEL: MONTHLY ══ -->
+  <div class="panel" id="panel-monthly">
+    <div class="month-toolbar">
+      <div class="section-title">月度 / 年度汇总</div>
+      <div class="year-chips" id="yearChips"></div>
+    </div>
+    <div class="stats-hero monthly-hero" id="yearHero"></div>
+    <div class="chart-card" style="margin-top:20px;">
+      <div class="chart-head">
+        <span class="chart-title">月度趋势对比</span>
+        <div class="ctrl-group" id="monthMetricGroup">
+          <button class="ctrl-btn active" onclick="setMonthMetric('reads',this)">阅读量</button>
+          <button class="ctrl-btn" onclick="setMonthMetric('shares',this)">分享数</button>
+          <button class="ctrl-btn" onclick="setMonthMetric('newfans',this)">新增粉丝</button>
+          <button class="ctrl-btn" onclick="setMonthMetric('content',this)">内容数</button>
+        </div>
+      </div>
+      <div class="chart-wrap chart-wrap-tall"><canvas id="monthChart"></canvas></div>
+    </div>
+    <div class="month-grid" id="monthGrid" style="margin-top:20px;"></div>
+  </div>
+
+</main>
+
+<!-- 回到顶部按钮 -->
+<button id="backToTopBtn" class="btn-back-to-top" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 19V5M5 12l7-7 7 7"/>
+  </svg>
+</button>
+
+<!-- ══ MODAL: ADD ARTICLE ══ -->
+<div class="overlay" id="articleOverlay">
+  <div class="modal">
+    <div class="modal-title">记录一篇文章</div>
+    <div class="form-group"><label class="form-label">文章标题</label><input class="form-input" id="a_title" type="text" placeholder="请输入文章标题"></div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">内容类型</label><select class="form-select" id="a_type"><option value="article">文章</option><option value="imgtext">图文</option><option value="video">视频</option><option value="audio">音频</option></select></div>
+      <div class="form-group"><label class="form-label">发布日期与时间</label><input class="form-input" id="a_datetime" type="datetime-local"></div>
+    </div>
+    <div class="form-group"><label class="form-label">是否原创</label>
+      <div style="display:flex;gap:12px;margin-top:4px;">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:var(--ink-mid);padding:10px 18px;border:1.5px solid rgba(0,0,0,0.1);border-radius:8px;flex:1;"><input type="radio" name="a_original" id="a_original_yes" value="1" style="accent-color:var(--green);width:16px;height:16px;" checked> 原创内容</label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:var(--ink-mid);padding:10px 18px;border:1.5px solid rgba(0,0,0,0.1);border-radius:8px;flex:1;"><input type="radio" name="a_original" id="a_original_no" value="0" style="accent-color:var(--green);width:16px;height:16px;"> 转载 / 非原创</label>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">AI 辅助创作</label>
+      <div style="display:flex;gap:12px;margin-top:4px;">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:10px 14px;border:1.5px solid rgba(0,0,0,0.1);border-radius:8px;flex:1;"><input type="radio" name="a_ai" id="a_ai_0" value="0" style="accent-color:var(--green);width:16px;height:16px;" checked> 未使用</label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:10px 14px;border:1.5px solid rgba(0,0,0,0.1);border-radius:8px;flex:1;"><input type="radio" name="a_ai" id="a_ai_1" value="1" style="accent-color:var(--green);width:16px;height:16px;"> 轻度使用</label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:10px 14px;border:1.5px solid rgba(0,0,0,0.1);border-radius:8px;flex:1;"><input type="radio" name="a_ai" id="a_ai_2" value="2" style="accent-color:var(--green);width:16px;height:16px;"> 高度使用</label>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn-cancel" onclick="closeArticleModal()">取消</button><button class="btn-save" onclick="saveArticle()">保存记录</button></div>
+  </div>
+</div>
+
+<!-- ══ MODAL: EDIT ARTICLE ══ -->
+<div class="overlay" id="editArticleOverlay">
+  <div class="modal">
+    <div class="modal-title">修改文章记录</div>
+    <input type="hidden" id="ea_ts">
+    <div class="form-group"><label class="form-label">文章标题</label><input class="form-input" id="ea_title" type="text"></div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">内容类型</label><select class="form-select" id="ea_type"><option value="article">文章</option><option value="imgtext">图文</option><option value="video">视频</option><option value="audio">音频</option></select></div>
+      <div class="form-group"><label class="form-label">发布日期与时间</label><input class="form-input" id="ea_datetime" type="datetime-local"></div>
+    </div>
+    <div class="form-group"><label class="form-label">是否原创</label>
+      <div style="display:flex;gap:12px;margin-top:4px;">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;padding:10px 18px;border:1.5px solid rgba(0,0,0,0.1);border-radius:8px;flex:1;"><input type="radio" name="ea_original" id="ea_original_yes" value="1" style="accent-color:var(--green);width:16px;height:16px;"> 原创内容</label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;padding:10px 18px;border:1.5px solid rgba(0,0,0,0.1);border-radius:8px;flex:1;"><input type="radio" name="ea_original" id="ea_original_no" value="0" style="accent-color:var(--green);width:16px;height:16px;"> 转载 / 非原创</label>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">AI 辅助创作</label>
+      <div style="display:flex;gap:12px;margin-top:4px;">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:10px 14px;border:1.5px solid rgba(0,0,0,0.1);border-radius:8px;flex:1;"><input type="radio" name="ea_ai" id="ea_ai_0" value="0" style="accent-color:var(--green);width:16px;height:16px;"> 未使用</label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:10px 14px;border:1.5px solid rgba(0,0,0,0.1);border-radius:8px;flex:1;"><input type="radio" name="ea_ai" id="ea_ai_1" value="1" style="accent-color:var(--green);width:16px;height:16px;"> 轻度使用</label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:10px 14px;border:1.5px solid rgba(0,0,0,0.1);border-radius:8px;flex:1;"><input type="radio" name="ea_ai" id="ea_ai_2" value="2" style="accent-color:var(--green);width:16px;height:16px;"> 高度使用</label>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn-cancel" onclick="closeEditArticleModal()">取消</button><button class="btn-save" onclick="updateArticle()">保存修改</button></div>
+  </div>
+</div>
+
+<!-- ══ MODAL: WEEK ══ -->
+<div class="overlay" id="weekOverlay">
+  <div class="modal">
+    <div class="modal-title">记录本周数据</div>
+    <div class="form-group">
+      <label class="form-label">周起始日期</label>
+      <input class="form-input" id="w_date" type="date" oninput="autoFillWeek()">
+    </div>
+    <div class="form-grid" style="margin-top:4px;">
+      <div class="form-group"><label class="form-label">周期名称</label><input class="form-input" id="w_label" type="text"></div>
+      <div class="form-group"><label class="form-label">日期范围</label><input class="form-input" id="w_range" type="text"></div>
+    </div>
+    <div class="form-divider">本周数据</div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">总阅读量</label><input class="form-input" id="w_reads" type="number" min="0"></div>
+      <div class="form-group"><label class="form-label">总分享次数</label><input class="form-input" id="w_shares" type="number" min="0"></div>
+      <div class="form-group"><label class="form-label">本周末粉丝量</label><input class="form-input" id="w_fans" type="number" min="0"></div>
+      <div class="form-group"><label class="form-label">本周新增粉丝</label><input class="form-input" id="w_newfans" type="number"></div>
+    </div>
+    <div class="form-divider">内容发布数量</div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">文章</label><input class="form-input" id="w_article" type="number" min="0"></div>
+      <div class="form-group"><label class="form-label">图文</label><input class="form-input" id="w_imgtext" type="number" min="0"></div>
+      <div class="form-group"><label class="form-label">视频</label><input class="form-input" id="w_video" type="number" min="0"></div>
+      <div class="form-group"><label class="form-label">音频</label><input class="form-input" id="w_audio" type="number" min="0"></div>
+    </div>
+    <div class="form-divider">阅读来源占比（%）</div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">搜一搜 %</label><input class="form-input" id="w_s1" type="number"></div>
+      <div class="form-group"><label class="form-label">推荐 %</label><input class="form-input" id="w_s2" type="number"></div>
+      <div class="form-group"><label class="form-label">朋友圈 %</label><input class="form-input" id="w_s3" type="number"></div>
+      <div class="form-group"><label class="form-label">公众号主页 %</label><input class="form-input" id="w_s4" type="number"></div>
+      <div class="form-group"><label class="form-label">公众号消息 %</label><input class="form-input" id="w_s5" type="number"></div>
+      <div class="form-group"><label class="form-label">聊天会话 %</label><input class="form-input" id="w_s6" type="number"></div>
+      <div class="form-group"><label class="form-label">其他 %</label><input class="form-input" id="w_s7" type="number"></div>
+    </div>
+    <div class="form-divider">本周感悟</div>
+    <div class="form-group"><textarea class="form-textarea" id="w_note"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeWeekModal()">取消</button>
+      <button class="btn-save" onclick="saveWeek()">保存记录</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: EDIT WEEK ══ -->
+<div class="overlay" id="editWeekOverlay">
+  <div class="modal">
+    <div class="modal-title">修改周报数据</div>
+    <input type="hidden" id="ew_ts">
+    <div class="form-group">
+      <label class="form-label">周起始日期</label>
+      <input class="form-input" id="ew_date" type="date" oninput="autoFillEditWeek()">
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">周期名称</label><input class="form-input" id="ew_label" type="text"></div>
+      <div class="form-group"><label class="form-label">日期范围</label><input class="form-input" id="ew_range" type="text"></div>
+    </div>
+    <div class="form-divider">本周数据</div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">总阅读量</label><input class="form-input" id="ew_reads" type="number" min="0"></div>
+      <div class="form-group"><label class="form-label">总分享次数</label><input class="form-input" id="ew_shares" type="number" min="0"></div>
+      <div class="form-group"><label class="form-label">本周末粉丝量</label><input class="form-input" id="ew_fans" type="number" min="0"></div>
+      <div class="form-group"><label class="form-label">本周新增粉丝</label><input class="form-input" id="ew_newfans" type="number"></div>
+    </div>
+    <div class="form-divider">内容发布数量</div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">文章</label><input class="form-input" id="ew_article" type="number" min="0"></div>
+      <div class="form-group"><label class="form-label">图文</label><input class="form-input" id="ew_imgtext" type="number" min="0"></div>
+      <div class="form-group"><label class="form-label">视频</label><input class="form-input" id="ew_video" type="number" min="0"></div>
+      <div class="form-group"><label class="form-label">音频</label><input class="form-input" id="ew_audio" type="number" min="0"></div>
+    </div>
+    <div class="form-divider">阅读来源占比（%）</div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">搜一搜 %</label><input class="form-input" id="ew_s1" type="number"></div>
+      <div class="form-group"><label class="form-label">推荐 %</label><input class="form-input" id="ew_s2" type="number"></div>
+      <div class="form-group"><label class="form-label">朋友圈 %</label><input class="form-input" id="ew_s3" type="number"></div>
+      <div class="form-group"><label class="form-label">公众号主页 %</label><input class="form-input" id="ew_s4" type="number"></div>
+      <div class="form-group"><label class="form-label">公众号消息 %</label><input class="form-input" id="ew_s5" type="number"></div>
+      <div class="form-group"><label class="form-label">聊天会话 %</label><input class="form-input" id="ew_s6" type="number"></div>
+      <div class="form-group"><label class="form-label">其他 %</label><input class="form-input" id="ew_s7" type="number"></div>
+    </div>
+    <div class="form-divider">本周感悟</div>
+    <div class="form-group"><textarea class="form-textarea" id="ew_note"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeEditWeekModal()">取消</button>
+      <button class="btn-save" onclick="updateWeek()">保存修改</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: PREVIEW CARD ══ -->
+<div class="card-preview-overlay" id="cardPreviewOverlay">
+  <div class="card-preview-modal">
+    <div class="card-preview-title">导出预览</div>
+    <canvas id="cardCanvas"></canvas>
+    <div class="card-preview-actions">
+      <button class="btn-cancel" onclick="document.getElementById('cardPreviewOverlay').classList.remove('show')" style="flex:1;padding:12px;">关闭</button>
+      <button class="btn-save" onclick="downloadCard()" style="flex:2;">保存高清卡片</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ACCESS GATE（云端模式访问口令）══ -->
+<div class="overlay gate-overlay" id="gateOverlay">
+  <div class="gate-card">
+    <div class="gate-lock">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15.5" r="1.6" fill="white" stroke="none"/></svg>
+    </div>
+    <div class="gate-title">访问验证</div>
+    <div class="gate-sub">这是一份私人运营日志<br>请输入访问口令查看数据</div>
+    <input class="gate-input" id="gateInput" type="password" placeholder="访问口令" autocomplete="current-password">
+    <button class="gate-btn" id="gateBtn">进入</button>
+    <div class="gate-error" id="gateError"></div>
+    <a href="javascript:void(0)" class="gate-offline" id="gateOffline">离线浏览本机缓存 →</a>
+    <div class="gate-hint">口令在部署 Supabase 时由你设定 · 验证通过后本设备自动记住</div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script src="./js/store.js"></script>
+<script src="./js/monthly.js"></script>
+<script src="./js/card.js"></script>
+<script src="./js/app.js"></script>
+</body>
+</html>
