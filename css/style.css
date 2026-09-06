@@ -57,7 +57,7 @@ body { font-family: var(--sans); background: var(--bg-base); color: var(--ink); 
 .logo-avatar-wrap:hover .logo-avatar { transform: scale(1.06) rotate(-2deg); }
 .logo-avatar-default { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, var(--green) 0%, var(--green-deep) 100%); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-green); transition: transform 0.3s var(--ease-spring); }
 .logo-avatar-wrap:hover .logo-avatar-default { transform: scale(1.06) rotate(-2deg); }
-.logo-avatar-default svg { width: 24px; height: 24px; fill: white; opacity: 0.95; }
+.logo-avatar-default img { width: 100%; height: 100%; border-radius: 12px; object-fit: cover; display: block; user-select: none; -webkit-user-drag: none; }
 .upload-hint { position: absolute; inset: 0; border-radius: 12px; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; font-size: 10px; color: white; font-family: var(--sans); letter-spacing: 0.03em; cursor: pointer; }
 .logo-avatar-wrap:hover .upload-hint { opacity: 1; }
 #avatarInput { display: none; }
@@ -401,7 +401,7 @@ body { font-family: var(--sans); background: var(--bg-base); color: var(--ink); 
   .header-inner { padding: 0 14px; height: 62px; gap: 8px; }
   .logo { gap: 10px; }
   .logo-avatar-wrap, .logo-avatar, .logo-avatar-default { width: 38px; height: 38px; }
-  .logo-avatar-default svg { width: 20px; height: 20px; }
+  .logo-avatar-default img { border-radius: 10px; }
   .logo-tagline { display: none; }
   .logo-name { font-size: 16px; white-space: nowrap; max-width: 34vw; overflow: hidden; text-overflow: ellipsis; }
   .header-actions { gap: 6px; }

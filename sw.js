@@ -4,7 +4,7 @@
    · 静态资源：缓存优先，后台更新
    · Supabase 云端 API：永不缓存
    ═══════════════════════════════════════════════════════ */
-const CACHE = 'glog-v3.2.c3ea3bfe';
+const CACHE = 'glog-v3.2.1dd2927b';
 const CORE = [
   './',
   './index.html',
@@ -19,7 +19,8 @@ const CORE = [
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
-  './icons/icon-maskable-512.png'
+  './icons/icon-maskable-512.png',
+  './icons/wechat.png'
 ];
 
 self.addEventListener('install', e => {
