@@ -42,7 +42,7 @@ function applyAvatar(src) {
 }
 
 function numFmt(n) { return (n >= 10000) ? (n / 10000).toFixed(1) + '万' : (n||0).toLocaleString('zh-CN'); }
-function esc(str) { return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function esc(str) { return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function fmtDatetime(iso) {
   if (!iso) return '—'; const d = new Date(iso); if (isNaN(d)) return '—';
   const pad = n => String(n).padStart(2,'0'); return `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
@@ -174,13 +174,13 @@ function renderArticleTable() {
   body.innerHTML = filtered.map((a, i) => `
     <div class="article-row" style="animation-delay:${i * 0.04}s">
       <div class="art-title">${esc(a.title) || '（无标题）'}</div>
-      <div><span class="art-type-badge ${TYPE_BG[a.type] || 'badge-article'}">${TYPE_MAP[a.type] || a.type}</span></div>
+      <div><span class="art-type-badge ${TYPE_BG[a.type] || 'badge-article'}">${TYPE_MAP[a.type] || esc(a.type)}</span></div>
       <div>${a.original !== 0 ? '<span class="badge-original">原创</span>' : '<span class="badge-repost">转载</span>'}</div>
       <div><span class="badge-ai ${AI_BG[a.aiUsage || 0]}">${AI_MAP[a.aiUsage || 0]}</span></div>
       <div class="art-date">${fmtDatetime(a.datetime)}</div>
       <div class="art-actions">
-        <button class="edit-btn" onclick="openEditArticleModal(${a._ts})">编辑</button>
-        <button class="del-btn" onclick="deleteArticle(${a._ts})">删除</button>
+        <button class="edit-btn" onclick="openEditArticleModal(${Number(a._ts) || 0})">编辑</button>
+        <button class="del-btn" onclick="deleteArticle(${Number(a._ts) || 0})">删除</button>
       </div>
     </div>`).join('');
 }
@@ -244,8 +244,8 @@ function buildWeekCard(w, num, delay) {
   const noteHtml = w.note ? `<div class="journal-section"><div class="journal-text">${esc(w.note)}</div></div>` : `<div class="journal-section"><div class="journal-empty">本周暂无感悟记录</div></div>`;
   const newfansStr = w.newfans > 0 ? `<span style="font-size:12px;color:var(--green);margin-left:6px;font-family:var(--sans);">+${w.newfans}</span>` : w.newfans < 0 ? `<span style="font-size:12px;color:#c0392b;margin-left:6px;font-family:var(--sans);">${w.newfans}</span>` : '';
   return `
-<div class="week-card" id="wc-${w._ts}" style="animation-delay:${delay*0.06}s">
-  <div class="week-head" onclick="toggleWeek(${w._ts})">
+<div class="week-card" id="wc-${Number(w._ts) || 0}" style="animation-delay:${delay*0.06}s">
+  <div class="week-head" onclick="toggleWeek(${Number(w._ts) || 0})">
     <div class="week-num">No.${String(num).padStart(2,'0')}</div>
     <div class="week-info"><div class="week-name">${esc(w.label||'本周')}</div><div class="week-range">${esc(w.range||'')}${w.wdate ? ' · ' + w.wdate : ''}</div></div>
     <div class="week-pills">
@@ -255,9 +255,9 @@ function buildWeekCard(w, num, delay) {
       <div class="pill-item"><div class="pill-val">${numFmt(w.shares)}</div><div class="pill-lbl">分享数</div></div>
     </div>
     <div class="expand-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
-    <div class="week-card-actions" onclick="event.stopPropagation()"><button class="edit-btn" onclick="openEditWeekModal(${w._ts})">编辑</button><button class="del-btn" onclick="deleteWeek(${w._ts})">删除</button></div>
+    <div class="week-card-actions" onclick="event.stopPropagation()"><button class="edit-btn" onclick="openEditWeekModal(${Number(w._ts) || 0})">编辑</button><button class="del-btn" onclick="deleteWeek(${Number(w._ts) || 0})">删除</button></div>
   </div>
-  <div class="week-body"><div class="body-grid"><div><div class="col-label">内容发布构成</div><div class="ct-list">${ctBars}</div></div><div><div class="col-label">阅读来源占比</div><div class="source-layout"><div class="donut-wrap"><canvas id="donut-${w._ts}"></canvas></div><div class="src-legend">${srcLegend}</div></div></div></div>${noteHtml}</div>
+  <div class="week-body"><div class="body-grid"><div><div class="col-label">内容发布构成</div><div class="ct-list">${ctBars}</div></div><div><div class="col-label">阅读来源占比</div><div class="source-layout"><div class="donut-wrap"><canvas id="donut-${Number(w._ts) || 0}"></canvas></div><div class="src-legend">${srcLegend}</div></div></div></div>${noteHtml}</div>
 </div>`;
 }
 
@@ -430,11 +430,13 @@ function importData(event) {
       const data = JSON.parse(e.target.result);
       if (!Array.isArray(data.articles) || !Array.isArray(data.weeks)) { alert('格式不正确：缺少 articles / weeks 数据'); return; }
       if (!confirm('检测到备份文件，是否合并导入？（相同记录自动去重）')) { event.target.value = ''; return; }
+      const cleanArticles = data.articles.map(Store.sanitizeArticle).filter(Boolean);   // 字段级清洗，防恶意/损坏数据
+      const cleanWeeks    = data.weeks.map(Store.sanitizeWeek).filter(Boolean);
       const existingArticleTs = new Set(articles.map(a => a._ts));
       const existingWeekTs = new Set(weeks.map(w => w._ts));
       let addedA = 0, addedW = 0;
-      data.articles.forEach(a => { if (a._ts != null && !existingArticleTs.has(a._ts)) { articles.push(a); addedA++; } });
-      data.weeks.forEach(w => { if (w._ts != null && !existingWeekTs.has(w._ts)) { weeks.push(w); addedW++; } });
+      cleanArticles.forEach(a => { if (!existingArticleTs.has(a._ts)) { articles.push(a); addedA++; } });
+      cleanWeeks.forEach(w => { if (!existingWeekTs.has(w._ts)) { weeks.push(w); addedW++; } });
       if (!avatar && typeof data.avatar === 'string' && data.avatar) { avatar = data.avatar; applyAvatar(avatar); }
       persist(); renderOverview(); renderArticleTable(); renderWeekList();
       event.target.value = '';

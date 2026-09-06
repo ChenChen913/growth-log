@@ -26,7 +26,7 @@ function buildMonthAgg() {
 
   const touch = key => {
     if (!byMonth[key]) byMonth[key] = { reads: 0, shares: 0, newfans: 0, fansLast: null, content: 0, posts: 0 };
-    years.add(key.slice(0, 4));
+    const yy = parseInt(key.slice(0, 4), 10); if (yy >= 2000 && yy <= 2100) years.add(String(yy));   // 年份强制数字，防注入
     return byMonth[key];
   };
 

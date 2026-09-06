@@ -28,6 +28,7 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
+canvas { max-width: 100%; }
 body { font-family: var(--sans); background: var(--bg-base); color: var(--ink); min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased; font-size: 15px; line-height: 1.6; position: relative; }
 
 ::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -413,7 +414,8 @@ body { font-family: var(--sans); background: var(--bg-base); color: var(--ink); 
   .page { padding: 18px 14px 96px; }
   .tabs-wrap { width: 100%; overflow-x: auto; border-radius: 16px; margin-bottom: 22px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
   .tabs-wrap::-webkit-scrollbar { display: none; }
-  .tab { flex: 1 0 auto; padding: 10px 18px; font-size: 14px; white-space: nowrap; }
+  /* 4 个标签均分一屏放下，不再横向裁切；极窄屏（<330px）回退为可滑动（见文件末尾媒体查询） */
+  .tab { flex: 1 1 0; min-width: 0; padding: 10px 6px; font-size: 13.5px; text-align: center; white-space: nowrap; }
 
   /* ── 总览 ── */
   .stats-hero { grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -422,6 +424,9 @@ body { font-family: var(--sans); background: var(--bg-base); color: var(--ink); 
   .stat-label { margin-bottom: 10px; font-size: 10px; }
   .stat-sub { margin-top: 8px; font-size: 12px; }
   .layout-cols { grid-template-columns: 1fr; }
+  /* 关键：grid 子项默认 min-width:auto 不可收缩，图表 canvas 会撑破窄屏导致右侧被裁 */
+  .layout-cols > *, .chart-card, .side-card, .chart-wrap, .chart-head { min-width: 0; max-width: 100%; }
+  .chart-wrap canvas { max-width: 100% !important; }
   .chart-card, .side-card { padding: 20px 16px; }
   .chart-head { flex-wrap: wrap; gap: 10px; align-items: center; }
   .chart-title { font-size: 18px; }
@@ -551,4 +556,9 @@ body { font-family: var(--sans); background: var(--bg-base); color: var(--ink); 
   .ux-card { padding: 28px 20px 20px; }
   .ux-banner { flex-wrap: wrap; gap: 10px; }
   .ux-banner-txt { flex: 1 1 calc(100% - 90px); }
+}
+
+/* 极窄屏（<330px，如 iPhone SE 1st gen）：tab 回退为可横向滑动 */
+@media (max-width: 329px) {
+  .tab { flex: 1 0 auto; padding: 10px 14px; font-size: 13px; }
 }

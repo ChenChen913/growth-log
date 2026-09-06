@@ -77,13 +77,52 @@
     return p;
   }
 
+  /* ─────────── 字段级清洗（防恶意/损坏 JSON：XSS、属性逃逸、原型污染）───────────
+     白名单重建：只保留已知字段并强制类型，任何多余字段（含 __proto__）直接丢弃 */
+  const WEEK_TYPES = ['article', 'imgtext', 'video', 'audio'];
+  const sStr  = (v, max) => { const s = String(v == null ? '' : v).slice(0, max); return s; };
+  const sNum  = (v, min, max) => { const n = Number(v); return isFinite(n) ? Math.min(max, Math.max(min, n)) : 0; };
+  const sInt  = (v, min, max) => Math.round(sNum(v, min, max));
+  function sanitizeArticle(a) {
+    if (!a || typeof a !== 'object') return null;
+    const ts = Number(a._ts); if (!isFinite(ts)) return null;
+    return {
+      _ts: Math.round(ts),
+      title: sStr(a.title, 300),
+      type: WEEK_TYPES.includes(a.type) ? a.type : 'article',
+      datetime: sStr(a.datetime, 32),
+      original: a.original === 0 ? 0 : 1,
+      aiUsage: [0,1,2].includes(a.aiUsage) ? a.aiUsage : 0
+    };
+  }
+  function sanitizeWeek(w) {
+    if (!w || typeof w !== 'object') return null;
+    const ts = Number(w._ts); if (!isFinite(ts)) return null;
+    const out = {
+      _ts: Math.round(ts),
+      _sortTs: sInt(w._sortTs, 0, 4102444800000),
+      label: sStr(w.label, 100),
+      range: sStr(w.range, 60),
+      wdate: sStr(w.wdate, 10),
+      reads: sInt(w.reads, 0, 1e12), shares: sInt(w.shares, 0, 1e12),
+      fans: sInt(w.fans, 0, 1e10), newfans: sInt(w.newfans, -1e8, 1e8),
+      article: sInt(w.article, 0, 999), imgtext: sInt(w.imgtext, 0, 999),
+      video: sInt(w.video, 0, 999), audio: sInt(w.audio, 0, 999),
+      s1: sNum(w.s1, 0, 100), s2: sNum(w.s2, 0, 100), s3: sNum(w.s3, 0, 100),
+      s4: sNum(w.s4, 0, 100), s5: sNum(w.s5, 0, 100), s6: sNum(w.s6, 0, 100), s7: sNum(w.s7, 0, 100),
+      note: sStr(w.note, 2000)
+    };
+    if (!out._sortTs && out.wdate) { const t = new Date(out.wdate).getTime(); if (isFinite(t)) out._sortTs = t; }
+    return out;
+  }
+
   function normalize(raw) {
     const p = blankPayload();
     if (raw && typeof raw === 'object') {
-      if (Array.isArray(raw.articles)) p.articles = raw.articles;
-      if (Array.isArray(raw.weeks))    p.weeks    = raw.weeks;
-      if (typeof raw.avatar === 'string') p.avatar = raw.avatar;
-      if (Array.isArray(raw.tombstones))  p.tombstones = raw.tombstones;
+      if (Array.isArray(raw.articles)) p.articles = raw.articles.map(sanitizeArticle).filter(Boolean);
+      if (Array.isArray(raw.weeks))    p.weeks    = raw.weeks.map(sanitizeWeek).filter(Boolean);
+      if (typeof raw.avatar === 'string') p.avatar = raw.avatar.slice(0, 800000);
+      if (Array.isArray(raw.tombstones))  p.tombstones = raw.tombstones.map(Number).filter(n => isFinite(n));
     }
     return p;
   }
@@ -293,6 +332,7 @@
     start,
     onReady(cb) { onReadyCb = cb; },
     setDataProvider(fn) { dataProvider = fn; },
+    sanitizeArticle, sanitizeWeek,   // 导入路径复用同一套清洗
     /* app.js 每次数据变动后调用 */
     persist() {
       const payload = readWorkingPayload();
