@@ -2,6 +2,8 @@
 
 本指南面向**没有任何服务器**的情况：前端托管在 GitHub Pages，数据存放在 Supabase 免费云数据库。全程约 15 分钟，之后零维护。
 
+> **依赖说明**：本项目是纯静态网站，**无需安装任何依赖**（没有 package.json、无需 npm install、无需构建）。本地预览只需要一个任意静态服务器（见文末），部署只需要一个 GitHub 账号 + 一个免费的 Supabase 账号。
+
 ```
 你的手机 / 电脑浏览器
         │  访问 https://<用户名>.github.io/<仓库名>/
@@ -105,13 +107,19 @@ GitHub Pages 的 `github.io` 域名国内通常可以直接访问（个别地区
 云端模式下所有数据在 Supabase，任何设备输入口令即同步全量数据。若你曾用离线浏览产生了未同步的改动，登录后会自动按记录合并（删除过的记录不会被"复活"）。
 
 **Q：如何更新网站？**
-修改本地文件后重新 push（或网页上传覆盖）即可。Service Worker 会在后台检测到新版本并自动刷新一次页面，无需手动清缓存。
+修改本地文件后重新 push（或网页上传覆盖）即可。
+
+> ⚠️ **重要：改了应用代码必须升级 Service Worker 缓存版本号**，否则老设备可能继续用旧缓存。方法：打开 `sw.js` 第一行，把 `const CACHE = 'glog-vX.X.XXXXXXX'` 引号内的字符串改掉（推荐附上新内容哈希或日期，如 `glog-v3.2.3-20260907`）再推送。改版本号后，所有设备会在下一次访问时自动检测、安装并刷新，无需用户手动清缓存。仅修改 .md 文档无需 bump。
 
 **Q：数据安全吗？**
 - 数据库两张表均启用 RLS 且收回匿名权限，anon key 无法直接读表；
 - 所有读写必须经过 RPC 函数，函数内部校验口令的 bcrypt 哈希；
 - 口令明文不落库、不进 Git 仓库（只存在于你的 Supabase 里）；
 - 建议每隔一两个月用「导出 JSON 备份」留一份本地存档。
+
+**Q：GitHub token / 密码安全？**
+- 如果曾在命令行使用过带 token 的推送命令，该 token 会留在终端历史中，建议定期在 GitHub → Settings → Developer settings → Personal access tokens 中轮换；
+- 仓库转私有 / 恢复公开可在 GitHub 仓库页 Settings → General → 拉到底部 Danger Zone 操作，或由助手代为 API 操作。
 
 **Q：以后想换掉 Supabase？**
 数据层做了抽象（`js/store.js`），只要实现同样的"整包读写"接口即可替换为 LeanCloud / Firebase 等，前端其余代码零改动。
