@@ -392,6 +392,7 @@ function exportData() {
   const payload = { _meta: { exportedAt: new Date().toISOString(), appName: '公众号成长日志', version: '3.0' }, articles, weeks, avatar: avatar || '', tombstones: window.__GLOG_TOMB__ || [] };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = '公众号成长日志_备份_' + new Date().toISOString().slice(0,10) + '.json'; a.click(); URL.revokeObjectURL(a.href);
+  try { localStorage.setItem('glog_last_backup', String(Date.now())); } catch (e) {}
 }
 
 function exportDetailedData() {

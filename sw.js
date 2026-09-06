@@ -4,7 +4,7 @@
    · 静态资源：缓存优先，后台更新
    · Supabase 云端 API：永不缓存
    ═══════════════════════════════════════════════════════ */
-const CACHE = 'glog-v3.0.631ce475';
+const CACHE = 'glog-v3.1.8c7b49a6';
 const CORE = [
   './',
   './index.html',
@@ -14,6 +14,7 @@ const CORE = [
   './js/app.js',
   './js/monthly.js',
   './js/card.js',
+  './js/ux.js',
   './vendor/chart.umd.min.js',
   './manifest.webmanifest',
   './icons/icon-192.png',
