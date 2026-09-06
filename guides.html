@@ -72,12 +72,6 @@
   .kpi b { display: block; font-family: var(--sans); font-size: 13.5px; color: var(--green-deep); margin-bottom: 4px; }
   .kpi p { font-size: 12.5px; line-height: 1.75; color: var(--ink-mid); margin: 0; }
 
-  /* 图集 */
-  .figs { max-width: 580px; margin: 4px auto 0; display: grid; gap: 14px; }
-  .figs figure { margin: 0; }
-  .figs img { width: 100%; display: block; border-radius: 12px; border: 1px solid var(--border); cursor: zoom-in; box-shadow: 0 4px 18px rgba(0,0,0,0.06); }
-  .figs figcaption { text-align: center; font-size: 11.5px; color: var(--ink-light); margin-top: 6px; letter-spacing: 0.03em; }
-
   /* 杨高能系列导航 */
   .pnav { display: flex; flex-wrap: wrap; gap: 7px; margin: 4px 0 18px; }
   .pnav a { font-size: 12px; color: var(--ink-mid); text-decoration: none; border: 1px solid var(--border); background: rgba(255,255,255,0.6); padding: 4px 12px; border-radius: 50px; transition: all 0.2s; }
@@ -90,11 +84,6 @@
   .copy-btn:hover { background: var(--green); color: #fff; border-color: var(--green); }
   .tree { background: #f7faf7; border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; overflow-x: auto; margin: 14px 0; }
   .tree pre { font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, 'Courier New', monospace; font-size: 12px; line-height: 1.85; color: var(--ink-mid); }
-
-  /* 看图放大 */
-  .lightbox { position: fixed; inset: 0; z-index: 99; background: rgba(18,24,20,0.92); display: none; align-items: center; justify-content: center; padding: 20px; cursor: zoom-out; }
-  .lightbox.on { display: flex; }
-  .lightbox img { max-width: 100%; max-height: 100%; border-radius: 10px; object-fit: contain; }
 
   /* 返回顶部 */
   .backtop { position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 20; width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(7,193,96,0.35); background: rgba(255,255,255,0.92); color: var(--green-deep); font-size: 17px; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,0.12); display: none; align-items: center; justify-content: center; }
@@ -118,8 +107,6 @@
     .abody { font-size: 14.5px; }
     .abody h3.sec { font-size: 16.5px; }
     .kpis { grid-template-columns: 1fr; }
-    .figs { gap: 10px; }
-    .figs img { border-radius: 10px; }
   }
 </style>
 </head>
@@ -166,29 +153,80 @@
       <div class="art-head">
         <h3>创作心法十条：一切的开始，是成为一个「人」</h3>
         <div class="meta">
-          <span>卡兹克</span><span>小红书 · 图文截图收藏</span><span class="plain">心法篇 → 战略篇 → 技法篇 → 修炼篇</span>
+          <span>卡兹克</span><span>小红书图文 · 全文文字版</span><span class="plain">心法篇 → 战略篇 → 技法篇 → 修炼篇</span>
         </div>
       </div>
       <div class="abody">
         <p class="lead">「大家好，我是数字生命卡兹克，在 AI 领域的公众号榜单上，已经连续 11 个月排名 TOP1。从 2023 年 2 月写下第一个字，到现在也有两年半了。这段时间里，我踩了不少坑，也积累了一些可能对大家有点用的小办法。今天全部分享给大家。」</p>
-        <p>十条心法按四个篇章展开，先速览再逐图细读：</p>
+        <p>十条心法按四个篇章展开。原文为小红书图文，此处已整理为文字版，先速览目录，再逐条细读：</p>
         <ul>
           <li><b>心法篇</b>：1. 活人感，是 AI 时代最贵的奢侈品 · 2. 真诚，是永远的必杀技 · 3. 价值观，比流量更重要</li>
           <li><b>战略篇</b>：4. 选题，决定了文章 80% 的生死 · 5. 你必须先是一个专家 · 6. 不懂的不要硬写，要写的就往死里研究</li>
           <li><b>技法篇</b>：7. 内容是故事，不是论文 · 8. 把读者当成很聪明、很有钱、但很忙的人 · 9. 用 HKR 原则检查每一个作品</li>
           <li><b>修炼篇</b>：10. 你的评论区，是下一篇爆款的起点</li>
         </ul>
-        <div class="figs">
-          <figure><img src="./guides/assets/kzx-01.jpg" alt="卡兹克创作心法 1" loading="lazy" width="1280" height="2133"><figcaption>开篇 · 心法篇：1、活人感，是 AI 时代最贵的奢侈品</figcaption></figure>
-          <figure><img src="./guides/assets/kzx-02.jpg" alt="卡兹克创作心法 2" loading="lazy" width="1280" height="2133"><figcaption>1 收束 · 2、真诚，是永远的必杀技</figcaption></figure>
-          <figure><img src="./guides/assets/kzx-03.jpg" alt="卡兹克创作心法 3" loading="lazy" width="1280" height="2133"><figcaption>3、价值观，比流量更重要 · 战略篇开篇</figcaption></figure>
-          <figure><img src="./guides/assets/kzx-04.jpg" alt="卡兹克创作心法 4" loading="lazy" width="1080" height="1800"><figcaption>4、选题决定 80% 的生死 · 5、你必须先是一个专家</figcaption></figure>
-          <figure><img src="./guides/assets/kzx-05.jpg" alt="卡兹克创作心法 5" loading="lazy" width="1280" height="2133"><figcaption>5 收束 · 6、不懂的不要硬写，要写的就往死里研究</figcaption></figure>
-          <figure><img src="./guides/assets/kzx-06.jpg" alt="卡兹克创作心法 6" loading="lazy" width="1280" height="2133"><figcaption>技法篇 · 7、内容是故事，不是论文</figcaption></figure>
-          <figure><img src="./guides/assets/kzx-07.jpg" alt="卡兹克创作心法 7" loading="lazy" width="1280" height="2133"><figcaption>7 收束 · 8、把读者当成很聪明、很有钱、但很忙的人</figcaption></figure>
-          <figure><img src="./guides/assets/kzx-08.jpg" alt="卡兹克创作心法 8" loading="lazy" width="1280" height="2133"><figcaption>8 收束 · 9、用 HKR 原则检查你的每一个作品</figcaption></figure>
-          <figure><img src="./guides/assets/kzx-09.jpg" alt="卡兹克创作心法 9" loading="lazy" width="1280" height="2133"><figcaption>9 收束 · 修炼篇 · 10、你的评论区，是下一篇爆款的起点</figcaption></figure>
-        </div>
+        <h3 class="sec">心法篇 · 一切的开始，是成为一个「人」</h3>
+        <h4 class="pt">1、活人感，是 AI 时代最贵的奢侈品</h4>
+        <p>在 AI 可以一分钟生成一万字的今天，AI 可以模仿任何风格的文笔，可以整合任何领域的知识，但它没有体温，没有心跳，没有回忆，更没有伤疤。</p>
+        <p>比如最近写的一篇，在淘宝上花 9.9 元买 DeepSeek 的故事。我完全可以写成一篇理性的分析文章，叫《AI 时代的信息差商业模式探究》。但我选择把它写成一个我自己的亲身经历：从一开始的好奇，到付款后的震惊，再到看评论区时的百感交集，最后是对这个魔幻世界的感同身受。</p>
+        <p>这就是我的视角、我的情感波动，这是 AI 无法复现的。<b>在 AI 时代，你的不完美、你的主观、你的「我以为」，才是最最坚固的护城河。</b></p>
+        <h4 class="pt">2、真诚，是永远的必杀技</h4>
+        <p>如果说「活人感」是风格，那「真诚」就是灵魂。我给自己定过一条规矩：<b>可以不说，但绝不欺骗。</b></p>
+        <p>在内容行业，确实有很多的诱惑：有时候一个产品找过来，给的实在太多了，但你明明觉得它不好用；一个观点能带来巨大的流量，但它违背你的常识。这时候，你怎么选？我的选择是，说真话。</p>
+        <p>股神巴菲特有句话，我一直记在心里：「建立一个好名声需要 20 年，而毁掉它，只需要 5 分钟。」读者不是傻子，你的每一次内容输出，都是在为你自己的品牌 IP 添砖加瓦。<b>真诚，就是你品牌最硬的那块基石。</b></p>
+        <h4 class="pt">3、价值观，比流量更重要</h4>
+        <p>这条是前两条的延伸。一个有「活人感」和「真诚」的创作者，必然会形成自己的价值观，而这个价值观，就是你的内容底线。</p>
+        <p>你会发现，网络上永远有数不清的热点，有些热点甚至可以说是流量密码，但不是所有的流量，我们都要去追。如果为了流量，去写一些自己都不信、甚至反对的东西，你可能会收获一篇爆款，但你的老读者会觉得你变了，你不再是他们当初关注的那个你了。你的人设、你的 IP，就在这一次次追逐流量的过程中，慢慢崩塌。</p>
+        <p><b>长期的品牌价值，永远比短期的流量数据更重要。</b>守住你的价值观，读者才能在你这里找到归属感和认同感。</p>
+        <h3 class="sec">战略篇 · 在下笔之前，决定八成胜负</h3>
+        <h4 class="pt">4、选题，决定了文章 80% 的生死</h4>
+        <p>我敢说，做内容，选题的重要性，占 80% 都说少了。那什么样的选题是好选题？我在实践中，摸索出了一个交集模型：</p>
+        <blockquote><b>一个好的选题 = 你的专业领域 + 读者的普遍兴趣 + 当下的时间节点。</b></blockquote>
+        <p>光是你的专业，可能会曲高和寡；光是读者的兴趣，可能会流于肤浅；光是蹭热点，可能会昙花一现。只有三者结合，才能找到那个最精准的引爆点。</p>
+        <p>比如之前达摩院用 AI 筛查癌症的选题：AI，是我的专业领域；生命健康，是所有人的普遍兴趣；当天他们发了新的论文，是完美的时间节点。这三者一叠加，文章的势能就起来了。</p>
+        <h4 class="pt">5、你必须先是一个专家</h4>
+        <p>这里的「专家」，不是说你非得有个博士学位，或者是什么行业大佬。而是指，<b>在你要写的这个具体问题上，你付出的研究和思考，要超过 90% 的读者。</b>这就是你的专业性。没有这个做地基，一切上层建筑都是空中楼阁。</p>
+        <h4 class="pt">6、不懂的，不要硬写；要写的，就往死里研究</h4>
+        <p>这是「专家」心态的另一面：承认自己的无知。一个成熟创作者的标志，就是知道自己的能力边界在哪里。不懂的领域，不碰，这是对自己负责，更是对读者负责。</p>
+        <p>那如果遇到一个选题，你特别想写、但又不了解怎么办？那就去学、去研究：把相关的资料、论文、报道、评论都看一遍，把产品从头到尾都用一遍。一定要在你内心里，真的觉得自己搞懂了，再开始写。</p>
+        <p>因为你要相信，评论区里一定有真正的专家。你写的任何一个不严谨的细节、任何一个想当然的推论，都会被他们拎出来。不要给他们这个机会——<b>对你写下的每一个字，都要有十足的把握和敬畏。</b></p>
+        <h3 class="sec">技法篇 · 把想说的，说到别人心里去</h3>
+        <h4 class="pt">7、内容是故事，不是论文</h4>
+        <p>我们从小到大，被训练的都是写论文、写报告，讲究的是结构完整、逻辑严谨、客观中立。但这套东西，在内容创作领域，很多时候是失灵的——<b>因为人脑不是用来处理逻辑的，人脑是用来理解故事的。</b></p>
+        <p>一篇再好的说明文，都不如一个引人入胜的故事更能让人记住。试着把你所有的内容，都用故事思维重新包装一遍。哪怕是评测一个产品，你也可以讲一个故事：</p>
+        <ul>
+          <li><b>冲突</b>：我遇到了一个什么麻烦？</li>
+          <li><b>探索</b>：我是怎么寻找解决方案的？</li>
+          <li><b>发现</b>：我是怎么遇到这个产品的？</li>
+          <li><b>高潮</b>：这个产品最让我惊艳的那个瞬间是什么？</li>
+          <li><b>结局</b>：它最终如何解决了我的麻烦？我的生活因此有了什么改变？</li>
+        </ul>
+        <p>你看，这样一来，一篇干巴巴的评测，就变成了一场读者可以代入的冒险。「故事，是把思想装进别人脑子里的最有效方式。」</p>
+        <h4 class="pt">8、把你的读者，当成一个很聪明、很有钱、但很忙的人</h4>
+        <p>我自己做过很长一段时间的金融，那时候，我们会把用户当成「很聪明、很有钱、但很忙的人」。这也是我一直奉行的读者画像法，在内容创作上，我觉得也一样。</p>
+        <ul>
+          <li><b>他很聪明</b>：所以你不要讲废话，不要把读者当傻子，不要反复解释那些显而易见的道理。要相信他们能听懂，你要做的，是把复杂的事情讲清楚，而不是把简单的事情反复说。</li>
+          <li><b>他很有钱（选择很多）</b>：他关注了无数个博主，他的时间非常宝贵。他选择花 10 分钟读你的文章，就意味着他放弃了去看一部剧、放弃了去刷短视频。你要对得起他的这份机会成本，你的内容必须值得他花这个时间。</li>
+          <li><b>他很忙</b>：所以你的文章结构一定要好看、要清晰，把重点加粗，让他可以快速抓住文章的核心，就算一目十行，也能有所收获。</li>
+        </ul>
+        <p>当你用这个标准去要求自己的每一篇文章时，你的内容质量自然就会提升。</p>
+        <h4 class="pt">9、用 HKR 原则，检查你的每一个作品</h4>
+        <p>这是影视飓风总结的最经典的好内容的原则，也是我自己的一个内容评判标准，分享给大家：HKR。</p>
+        <ul>
+          <li><b>H（Happiness / Hook）愉悦感 / 好奇心</b>：你的内容有趣吗？你的标题、你的开头，能勾住他、让他想继续看下去吗？能不能让他产生「卧槽，还有这种事？」的感觉？</li>
+          <li><b>K（Knowledge）知识 / 信息</b>：你的内容有料吗？读者看完，能学到新东西吗？能让他觉得「原来是这样，学到了」吗？这是你内容的硬核价值。</li>
+          <li><b>R（Resonance）共鸣</b>：你的内容能戳中他吗？能让他产生「对对对，我也是这么想的」这种感觉吗？这是你和读者建立情感连接的关键。</li>
+        </ul>
+        <p>一篇优秀的文章，一定是三者兼备的；一篇及格的文章，至少要占两样。如果只占一样，那就要警惕了；如果一样都没有，那还是别发了。</p>
+        <h3 class="sec">修炼篇 · 写完之后，一切才刚刚开始</h3>
+        <h4 class="pt">10、你的评论区，是下一篇爆款的起点</h4>
+        <p>很多创作者，文章一发，就觉得工作结束了。但在我看来，这恰恰是工作的开始。一定要去读你后台的每一条评论——评论区不是你的成绩单，它是你的宝藏库。读者会在那里，用最真实的话告诉你：</p>
+        <ul>
+          <li>他们哪里没看懂。<b>（说明你没讲清楚）</b></li>
+          <li>他们对什么最感兴趣。<b>（这是你的内容亮点）</b></li>
+          <li>他们还想知道什么。<b>（这是你下个选题的来源）</b></li>
+          <li>他们发现了你文章里的错误。<b>（赶紧改，并且感谢他）</b></li>
+        </ul>
       </div>
     </article>
     <article class="art" id="art-kzx-fangfa">
@@ -729,14 +767,66 @@
       <div class="art-head">
         <h3>Tech Lead 能力体系 · 一页纸</h3>
         <div class="meta">
-          <span>附带资料</span><span class="plain">与公众号运营无直接关系，暂存于此</span>
+          <span>附带资料 · 文字整理版</span><span class="plain">与公众号运营无直接关系，暂存于此</span>
         </div>
       </div>
       <div class="abody">
-        <p class="lead">这张「Tech Lead 能力体系一页纸」（用 6 个 MECE 维度拆清楚：方向、设计、工程、交付、协作、组织）与公众号运营没有直接关系，偏向技术团队管理。因为它是和指导资料一起提供的，先收录在这里备查；如果不需要，随时可以移除。</p>
-        <div class="figs">
-          <figure><img src="./guides/assets/techlead.jpg" alt="Tech Lead 能力体系一页纸" loading="lazy" width="2246" height="1588"><figcaption>TL One-Pager · 方向 / 设计 / 工程 / 交付 / 协作 / 组织（点击放大）</figcaption></figure>
-        </div>
+        <p class="lead">这份「Tech Lead 能力体系一页纸」（用 6 个 MECE 维度拆清楚：方向、设计、工程、交付、协作、组织）与公众号运营没有直接关系，偏向技术团队管理。因为它是和指导资料一起提供的，已整理为文字版收录在这里备查；如果不需要，随时可以移除。</p>
+        <blockquote><b>核心思想：TL 的价值不在写更多代码，而在把问题拆清楚、把团队组织起来、把交付跑出确定性。</b><br>常见可沉淀的产出物：PRD 模版 · Design Spec · ADR · Review Checklist · Release Checklist · Postmortem</blockquote>
+        <h3 class="sec">01 方向 · Strategy & Product</h3>
+        <ul>
+          <li><b>目标对齐</b>：技术目标映射业务结果（什么算赢）</li>
+          <li><b>需求解码</b>：边界条件、优先级、验收标准</li>
+          <li><b>取舍与说不</b>：范围控制、成本/收益、短期/长期</li>
+          <li><b>指标体系</b>：体验、SLA、效率的度量与复盘</li>
+          <li><b>路线图</b>：技术规划、技术债策略、平台化节奏</li>
+          <li><b>Mental Models</b>：First Principles / Second Order Thinking / Map != Territory</li>
+        </ul>
+        <h3 class="sec">02 设计 · Architecture & Design</h3>
+        <ul>
+          <li><b>边界与模块</b>：职责、依赖、上下游契约</li>
+          <li><b>抽象与模型</b>：核心对象、状态机、领域建模</li>
+          <li><b>接口与兼容</b>：API 设计、幂等、错误码、演进</li>
+          <li><b>关键路径</b>：性能、容量、可用性与扩展性</li>
+          <li><b>安全合规</b>：权限模型、审计、数据分级与隐私</li>
+          <li><b>产出</b>：Design Spec / ADR / 风险清单</li>
+        </ul>
+        <h3 class="sec">03 工程 · Engineering Excellence</h3>
+        <ul>
+          <li><b>代码标准</b>：编码风格、异常处理、一致性</li>
+          <li><b>测试体系</b>：单测 / 集成 / 端到端与覆盖目标</li>
+          <li><b>评审机制</b>：PR/MR、写好 Review、Pair/Mob</li>
+          <li><b>CI/CD</b>：灰度、回滚、变更治理与门禁</li>
+          <li><b>可观测性</b>：日志、指标、链路追踪、告警</li>
+          <li><b>安全编码</b>：Web / DB / 协议 / 隐私与数据安全</li>
+        </ul>
+        <h3 class="sec">04 交付 · Delivery & Execution</h3>
+        <ul>
+          <li><b>计划节奏</b>：里程碑、WIP、迭代节奏</li>
+          <li><b>估算范围</b>：拆解、缓冲、阶段性交付</li>
+          <li><b>风险依赖</b>：识别、预案、止损点与升级</li>
+          <li><b>任务派工</b>：可并行、可验收、可回滚</li>
+          <li><b>上线验收</b>：发布 checklist、监控与回归</li>
+          <li><b>复盘改进</b>：Postmortem / Retro / 闭环</li>
+        </ul>
+        <h3 class="sec">05 协作 · Communication & Influence</h3>
+        <ul>
+          <li><b>倾听提问</b>：把分歧问出来，把假设写下来</li>
+          <li><b>异步沟通</b>：用文档推进、信息可检索</li>
+          <li><b>解释能力</b>：ELI5，把复杂技术讲到可决策</li>
+          <li><b>叙事推进</b>：背景—冲突—选择—代价—结论</li>
+          <li><b>向上 / 跨团队</b>：管理预期、对齐接口与节奏</li>
+          <li><b>关键动作</b>：写清楚决策记录，减少口头对齐的成本</li>
+        </ul>
+        <h3 class="sec">06 组织 · Leadership & People</h3>
+        <ul>
+          <li><b>招育用留</b>：招聘、发展路径、梯队建设</li>
+          <li><b>带教辅导</b>：Code Walkthrough、成长计划</li>
+          <li><b>反馈机制</b>：Constructive Feedback / Radical Candor</li>
+          <li><b>授权 Ownership</b>：角色边界、责任制、轮值</li>
+          <li><b>文化建设</b>：质量意识、复盘文化、心理安全</li>
+          <li><b>影响力</b>：无职权推进、Managing Upwards</li>
+        </ul>
       </div>
     </article>
   </section>
@@ -747,34 +837,10 @@
   </div>
 </div>
 
-<div class="lightbox" id="lightbox"><img id="lightboxImg" src="" alt="预览"></div>
 <button class="backtop" id="backtop" aria-label="返回顶部">↑</button>
 
 <script>
 (function () {
-  /* 图片点击放大 */
-  var lb = document.getElementById('lightbox');
-  var lbImg = document.getElementById('lightboxImg');
-  document.querySelectorAll('.figs img').forEach(function (img) {
-    img.addEventListener('click', function () {
-      lbImg.src = img.src;
-      lb.classList.add('on');
-      document.body.style.overflow = 'hidden';
-    });
-  });
-  lb.addEventListener('click', function () {
-    lb.classList.remove('on');
-    lbImg.src = '';
-    document.body.style.overflow = '';
-  });
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && lb.classList.contains('on')) {
-      lb.classList.remove('on');
-      lbImg.src = '';
-      document.body.style.overflow = '';
-    }
-  });
-
   /* 返回顶部 */
   var bt = document.getElementById('backtop');
   window.addEventListener('scroll', function () {
