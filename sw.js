@@ -4,7 +4,7 @@
    · 静态资源：缓存优先，后台更新
    · Supabase 云端 API：永不缓存
    ═══════════════════════════════════════════════════════ */
-const CACHE = 'glog-v3.2.1dd2927b';
+const CACHE = 'glog-v3.2.862570a8';
 const CORE = [
   './',
   './index.html',
@@ -45,15 +45,14 @@ self.addEventListener('fetch', e => {
   const url = new URL(req.url);
   if (url.hostname.includes('supabase')) return;   // 云端数据永走网络
 
-  /* config.js：网络优先 —— 用户修改云端配置后立即生效 */
+  /* config.js：网络优先 —— 用户修改云端配置后立即生效；非 200 回退缓存（防私有化 404 污染） */
   if (url.pathname.endsWith('/js/config.js')) {
     e.respondWith(
       fetch(req)
         .then(res => {
-          if (res.ok) {
-            const copy = res.clone();
-            caches.open(CACHE).then(c => c.put(req, copy));
-          }
+          if (!res.ok) return caches.match(req).then(hit => hit || res);
+          const copy = res.clone();
+          caches.open(CACHE).then(c => c.put(req, copy));
           return res;
         })
         .catch(() => caches.match(req))
@@ -61,11 +60,12 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  /* 页面导航：网络优先，离线回退 */
+  /* 页面导航：网络优先；仅 200 刷新缓存，404/错误页回退缓存（防私有化后缓存被 404 页污染） */
   if (req.mode === 'navigate' || url.pathname.endsWith('.html') || url.pathname.endsWith('/')) {
     e.respondWith(
       fetch(req)
         .then(res => {
+          if (!res.ok) return caches.match('./index.html');
           const copy = res.clone();
           caches.open(CACHE).then(c => c.put('./index.html', copy));
           return res;
