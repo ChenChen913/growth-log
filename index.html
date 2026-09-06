@@ -8,13 +8,13 @@
 <meta name="theme-color" content="#07C160">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" type="image/png" href="./icons/icon-192.png">
+<link rel="preload" as="image" href="./icons/wechat.png">
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="成长日志">
 <link rel="stylesheet" href="./css/style.css">
-<script src="./vendor/chart.umd.min.js"></script>
 <script src="./js/config.js"></script>
 </head>
 <body>
@@ -27,9 +27,9 @@
     <div class="logo">
       <div class="logo-avatar-wrap" onclick="document.getElementById('avatarInput').click()">
         <div class="logo-avatar-default" id="avatarDefault">
-          <img src="./icons/wechat.png" alt="微信" draggable="false">
+          <img src="./icons/wechat.png" alt="微信" width="44" height="44" draggable="false">
         </div>
-        <img class="logo-avatar" id="avatarImg" src="" alt="公众号头像" style="display:none;">
+        <img class="logo-avatar" id="avatarImg" src="" alt="公众号头像" width="44" height="44" style="display:none;">
         <div class="upload-hint">上传头像</div>
       </div>
       <input type="file" id="avatarInput" accept="image/*">
@@ -105,12 +105,20 @@
             <button class="btn-export" onclick="exportDetailedData()" style="background:linear-gradient(135deg,#059952 0%,#047a42 100%);">导出详细数据</button>
             <button class="btn-export-ghost" onclick="exportData()">导出 JSON 备份</button>
             <button class="btn-export-ghost" onclick="triggerImport()" style="border-color:rgba(7,193,96,0.35);color:rgba(255,255,255,0.8);">导入历史数据</button>
+            <button class="btn-export-ghost" onclick="openCloudInfo()">云端数据说明</button>
             <button class="btn-export-ghost" id="demoDataBtn" onclick="loadDemoData()">载入演示数据</button>
             <button class="btn-export-ghost btn-export-danger" id="logoutBtn" onclick="Store.logout()" style="display:none;">退出云端会话</button>
             <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importData(event)">
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- 公众号运营指导入口卡 -->
+    <div class="guide-card" role="link" tabindex="0" onclick="window.open('./guides.html','_blank')" onkeydown="if(event.key==='Enter')window.open('./guides.html','_blank')">
+      <div class="guide-ico"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h7M9 11h5"/></svg></div>
+      <div class="guide-txt"><b>公众号运营指导</b><i>选题 · 标题 · 排版 · 涨粉 · 数据分析，实战经验持续更新</i></div>
+      <span class="guide-arrow">→</span>
     </div>
   </div>
 
@@ -382,8 +390,39 @@
   </div>
 </div>
 
+<!-- ══ MODAL: CLOUD INFO（云端数据说明）══ -->
+<div class="overlay" id="cloudInfoOverlay">
+  <div class="modal">
+    <div class="modal-title">云端数据说明</div>
+    <div class="ci-block">
+      <div class="ci-h">你的数据存在哪里？</div>
+      <p class="ci-p">每条记录都会保存三个副本，层层兜底，缺了谁都不怕：</p>
+      <div class="ci-row"><b>① 本设备浏览器</b><span>记录瞬间先存这里，断网也成功，秒级完成</span></div>
+      <div class="ci-row"><b>② Supabase 云端</b><span>约 2 秒后自动整包上传，手机电脑共享同一份数据</span></div>
+      <div class="ci-row"><b>③ JSON 备份文件</b><span>手动导出的终极保险，建议每季度存一份到电脑 / 网盘</span></div>
+    </div>
+    <div class="ci-block">
+      <div class="ci-h">断网或云端异常时</div>
+      <p class="ci-p">断网照常记录：数据在本设备暂存并标记「离线待同步」，联网后<b>自动补传</b>，无需任何操作。Supabase 免费版连续 7 天无访问会休眠（数据原样保留，唤醒约 1 分钟）；长期搁置时点一次保活链接即可防止休眠。</p>
+    </div>
+    <div class="ci-block">
+      <div class="ci-h">保活与巡检</div>
+      <div class="ci-row"><b>平时</b><span>什么都不用做，徽标显示「已同步」即一切正常</span></div>
+      <div class="ci-row"><b>长期不用时</b><span>每 1~2 周点一次保活链接（只读操作，不产生写入）</span></div>
+      <div class="ci-row"><b>每季度</b><span>导出 JSON 备份 + 到 Supabase 控制台看一次用量</span></div>
+      <button class="ci-copy" onclick="copyKeepalive()">复制保活链接（内含访问口令，切勿外传）</button>
+    </div>
+    <div class="ci-foot">与仓库文档 DATA.md 同源维护 · 数据流向 / 恢复方法详见 DATA.md</div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeCloudInfo()">我知道了</button>
+      <button class="btn-save" onclick="exportData(); closeCloudInfo();">立即导出 JSON 备份</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast-wrap" id="toastWrap"></div>
 
+<script src="./vendor/chart.umd.min.js"></script>
 <script src="./js/store.js"></script>
 <script src="./js/monthly.js"></script>
 <script src="./js/card.js"></script>

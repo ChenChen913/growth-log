@@ -558,3 +558,56 @@ Store.onReady(function(payload, meta) {
     });
   }
 });
+
+/* ========================================
+   v3.3 · 云端数据热更新
+   缓存优先启动后，云端最新数据到达时仅在内容确有变化时重绘，
+   数据一致则零打扰（不重播图表动画、不弹提示）。
+======================================== */
+Store.onRefresh(function(payload) {
+  articles = payload.articles || [];
+  weeks    = payload.weeks || [];
+  const newAvatar = payload.avatar || '';
+  if (newAvatar !== avatar) { avatar = newAvatar; if (avatar) applyAvatar(avatar); }
+  renderOverview();
+  renderArticleTable();
+  renderWeekList();
+  renderTrendLine();
+  if (document.getElementById('panel-monthly').classList.contains('active') && typeof renderMonthly === 'function') renderMonthly();
+});
+
+/* ========================================
+   v3.3 · 云端数据说明弹窗 + 保活链接
+   保活链接在点击时用「当前已登录口令」动态拼装，
+   源码中不含任何口令，公开仓库零泄露。
+======================================== */
+function openCloudInfo()  { document.getElementById('cloudInfoOverlay').classList.add('show'); }
+function closeCloudInfo() { document.getElementById('cloudInfoOverlay').classList.remove('show'); }
+
+function copyKeepalive() {
+  try {
+    const cfg  = window.APP_CONFIG || {};
+    const code = localStorage.getItem('glog_passcode') || '';
+    if (!cfg.SUPABASE_URL || !code) throw new Error('not-logged-in');
+    const url = cfg.SUPABASE_URL.replace(/\/+$/, '')
+      + '/rest/v1/rpc/sync_get?p_code=' + encodeURIComponent(code)
+      + '&apikey=' + encodeURIComponent(cfg.SUPABASE_ANON_KEY || '');
+    const done = () => Store.toast('保活链接已复制，建议存入收藏夹，每 1~2 周打开一次', 'ok');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(done).catch(() => fallbackCopy(url, done));
+    } else fallbackCopy(url, done);
+  } catch (e) {
+    Store.toast('复制失败：请先登录云端模式', 'err');
+  }
+}
+
+function fallbackCopy(text, done) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;opacity:0;left:-999px;';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); done(); }
+  catch (e) { Store.toast('复制失败，请手动复制', 'err'); }
+  ta.remove();
+}

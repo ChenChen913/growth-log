@@ -22,6 +22,8 @@
   let currentPasscode = null;
   let pushTimer = null;
   let onReadyCb = null;
+  let onRefreshCb = null;    // 云端返回后的热更新回调（仅内容有变化时触发）
+  let renderedKey = '';      // 已渲染 payload 的指纹，用于去重避免无谓重绘
   let dataProvider = null;   // app.js 注入：读取当前文章/周报数据
   let booted = false;
 
@@ -172,8 +174,9 @@
     }
     return res.json();
   }
-  const pull = () => rpc('sync_get', { p_code: currentPasscode });
-  const push = payload => rpc('sync_save', { p_code: currentPasscode, p_payload: payload });
+  const savedCode = () => currentPasscode || localStorage.getItem(LS.passcode) || '';
+  const pull = () => rpc('sync_get', { p_code: savedCode() });
+  const push = payload => rpc('sync_save', { p_code: savedCode(), p_payload: payload });
 
   /* ─────────── 推送（防抖 + 失败暂存）─────────── */
   function schedulePush(delay) {
@@ -252,21 +255,27 @@
       if (cached && cached.dirty && cached.payload) {
         payload = mergePayload(remote, cached.payload);
         writeCache(payload, true);
-        bootNow(payload);
+        refreshNow(payload);
         schedulePush(300);
       } else {
         writeCache(remote, false);
-        bootNow(remote);
+        refreshNow(remote);
         badge('ok', '已同步 · ' + timeHM(), '已同步 ' + timeHM());
       }
       return true;
     } catch (e) {
-      currentPasscode = null;
       if (e.code === 'ACCESS_DENIED') {
+        currentPasscode = null;
         localStorage.removeItem(LS.passcode);
         if (!silent) showGate('口令不正确，请重试'); else showGate('');
         badge('err', '等待口令验证', '待验证');
+      } else if (booted) {
+        /* 已用本机缓存完成渲染，不打断用户：保持可浏览，联网后自动补同步。
+           注意：不清空 currentPasscode —— 口令本就有效，只是网络不通，
+           保留它才能让离线期间的改动在联网后正常补传。 */
+        badge('err', '离线 · 正在显示缓存数据', '离线浏览中');
       } else {
+        currentPasscode = null;
         showGate(e.code === 'OFFLINE'
           ? '网络不可用，请检查网络后重试，或先离线浏览'
           : '连接云端失败（' + (e.detail || '请检查 Supabase 配置') + '），可先离线浏览');
@@ -286,11 +295,28 @@
   }
 
   /* ─────────── 启动流程 ─────────── */
+  /* 纯内容指纹：只比较文章/周报/头像/墓碑，排除 updatedAt 等每次都会变化的时间戳 */
+  function payloadKey(p) {
+    try { p = p || {}; return JSON.stringify([p.articles, p.weeks, p.avatar, p.tombstones]); }
+    catch (e) { return ''; }
+  }
+
   function bootNow(payload) {
     if (booted) return;
     booted = true;
+    renderedKey = payloadKey(payload);
     window.__GLOG_TOMB__ = payload.tombstones || [];
     if (onReadyCb) onReadyCb(payload, { mode });
+  }
+
+  /* 数据热更新：已开屏后云端返回数据，与已渲染内容不同才重绘，相同则零打扰 */
+  function refreshNow(payload) {
+    if (!booted) { bootNow(payload); return; }
+    const key = payloadKey(payload);
+    if (key === renderedKey) return;
+    renderedKey = key;
+    window.__GLOG_TOMB__ = payload.tombstones || [];
+    if (onRefreshCb) onRefreshCb(payload, { mode });
   }
 
   function start() {
@@ -309,7 +335,15 @@
       bootNow(payload);
     } else {
       const saved = localStorage.getItem(LS.passcode);
-      if (saved) tryVerify(saved, true); else showGate('');
+      if (saved) {
+        /* 缓存优先启动：先用本机缓存瞬间渲染整屏数据，再向云端核对最新版本 */
+        const c = readCache();
+        if (c && c.payload) {
+          bootNow(normalize(c.payload));
+          badge('busy', '正在同步最新数据…', '连接中…');
+        }
+        tryVerify(saved, true);
+      } else showGate('');
     }
   }
 
@@ -331,6 +365,7 @@
   window.Store = {
     start,
     onReady(cb) { onReadyCb = cb; },
+    onRefresh(cb) { onRefreshCb = cb; },
     setDataProvider(fn) { dataProvider = fn; },
     sanitizeArticle, sanitizeWeek,   // 导入路径复用同一套清洗
     /* app.js 每次数据变动后调用 */

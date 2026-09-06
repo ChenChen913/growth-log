@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>公众号运营指导 · 公众号成长日志</title>
+<meta name="description" content="公众号运营实战指导：选题定位、标题打磨、排版规范、涨粉策略、数据分析。">
+<meta name="theme-color" content="#07C160">
+<style>
+  :root {
+    --green: #07C160; --green-deep: #047a42;
+    --ink: #1c2128; --ink-mid: #3d4450; --ink-light: #8a919c;
+    --bg: #eef3ee; --glass: rgba(255,255,255,0.72);
+    --border: rgba(0,0,0,0.06); --radius: 18px;
+    --serif: 'Noto Serif SC', 'Songti SC', 'SimSun', serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: var(--sans); background: var(--bg); color: var(--ink); min-height: 100vh; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 24px 60px; }
+
+  /* 顶栏 */
+  .topbar { position: sticky; top: 0; z-index: 10; background: rgba(238,243,238,0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-bottom: 1px solid rgba(7,193,96,0.10); }
+  .topbar-inner { max-width: 860px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .back { display: inline-flex; align-items: center; gap: 7px; color: var(--ink-mid); text-decoration: none; font-size: 14px; padding: 8px 16px; border-radius: 50px; border: 1px solid var(--border); background: var(--glass); transition: all 0.2s; }
+  .back:hover { color: var(--green-deep); border-color: rgba(7,193,96,0.4); }
+  .brand { font-size: 13px; color: var(--ink-light); letter-spacing: 0.04em; }
+
+  /* 头图区 */
+  .hero { text-align: center; padding: 54px 0 40px; }
+  .hero-ico { width: 64px; height: 64px; margin: 0 auto 20px; border-radius: 18px; background: linear-gradient(135deg, var(--green) 0%, var(--green-deep) 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(7,193,96,0.30); }
+  .hero-ico svg { width: 32px; height: 32px; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; font-weight: 600; letter-spacing: 0.03em; }
+  .hero p { margin-top: 12px; font-size: 14px; color: var(--ink-light); letter-spacing: 0.05em; }
+
+  /* 提示条 */
+  .notice { background: var(--glass); border: 1px dashed rgba(7,193,96,0.45); border-radius: var(--radius); padding: 18px 22px; font-size: 13.5px; line-height: 1.8; color: var(--ink-mid); margin-bottom: 26px; }
+  .notice b { color: var(--green-deep); }
+
+  /* 主题卡网格 */
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .topic { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; position: relative; overflow: hidden; transition: transform 0.22s, box-shadow 0.22s, border-color 0.22s; }
+  .topic:hover { transform: translateY(-3px); box-shadow: 0 14px 36px rgba(0,0,0,0.08); border-color: rgba(7,193,96,0.35); }
+  .topic::after { content: ''; position: absolute; right: -34px; top: -34px; width: 110px; height: 110px; border-radius: 50%; background: radial-gradient(circle, rgba(7,193,96,0.12) 0%, transparent 70%); }
+  .topic h3 { font-family: var(--serif); font-size: 17px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 9px; }
+  .topic h3 .n { width: 24px; height: 24px; flex-shrink: 0; border-radius: 7px; background: rgba(7,193,96,0.12); color: var(--green-deep); font-family: var(--sans); font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; }
+  .topic p { font-size: 12.5px; line-height: 1.7; color: var(--ink-light); }
+  .topic .chip { position: absolute; top: 16px; right: 16px; font-size: 11px; color: var(--ink-light); border: 1px solid var(--border); padding: 3px 10px; border-radius: 50px; background: rgba(255,255,255,0.6); }
+
+  /* 底部 */
+  .foot { text-align: center; margin-top: 44px; font-size: 12.5px; color: var(--ink-light); }
+  .foot a { color: var(--green-deep); text-decoration: none; font-weight: 500; }
+  .foot a:hover { text-decoration: underline; }
+
+  @media (max-width: 640px) {
+    .grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 24px; }
+    .hero { padding: 38px 0 28px; }
+    .topbar-inner { padding: 12px 16px; }
+    .wrap { padding: 0 16px 44px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="back" href="./index.html">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      返回日志
+    </a>
+    <span class="brand">公众号成长日志</span>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="hero">
+    <div class="hero-ico">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h7M9 11h5"/></svg>
+    </div>
+    <h1>公众号运营指导</h1>
+    <p>从零到一做公众号的实战经验 · 持续更新中</p>
+  </div>
+
+  <div class="notice">
+    <b>说明：</b>本页面收录公众号运营相关的指导文章，与日志数据相互独立。文章内容正在整理排版中，整理好后会陆续发布到对应栏目，届时从这里即可直接阅读。
+  </div>
+
+  <div class="grid">
+    <div class="topic">
+      <span class="chip">筹备中</span>
+      <h3><span class="n">01</span>选题与定位</h3>
+      <p>账号定位怎么找、目标读者怎么画像、选题库怎么搭建，让每一篇都有明确的写作方向。</p>
+    </div>
+    <div class="topic">
+      <span class="chip">筹备中</span>
+      <h3><span class="n">02</span>标题打磨</h3>
+      <p>好标题的常见句式、长度与关键词原则、避坑指南，以及 10 分钟快速打磨标题的工作流。</p>
+    </div>
+    <div class="topic">
+      <span class="chip">筹备中</span>
+      <h3><span class="n">03</span>排版规范</h3>
+      <p>字号行距与配色、段落呼吸感、图文配比、封面图细节，让文章看起来专业舒适。</p>
+    </div>
+    <div class="topic">
+      <span class="chip">筹备中</span>
+      <h3><span class="n">04</span>涨粉策略</h3>
+      <p>搜一搜 SEO、朋友圈裂变、互推合作、评论区运营等接地气的涨粉打法与真实案例。</p>
+    </div>
+    <div class="topic">
+      <span class="chip">筹备中</span>
+      <h3><span class="n">05</span>数据分析</h3>
+      <p>周报数据怎么读：阅读来源占比、分享率、涨粉转化，用数据反推下一步内容策略。</p>
+    </div>
+    <div class="topic">
+      <span class="chip">筹备中</span>
+      <h3><span class="n">06</span>AI 辅助创作</h3>
+      <p>AI 在选题、初稿、润色环节的正确用法与边界，既提效又不丢个人风格。</p>
+    </div>
+  </div>
+
+  <div class="foot">
+    文章由本账号整理撰写 · <a href="./index.html">返回成长日志 →</a>
+  </div>
+</div>
+
+</body>
+</html>
