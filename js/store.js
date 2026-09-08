@@ -205,6 +205,17 @@
     }
   }
 
+  /* ─────────── v3.9 · 云端全量导出 ───────────
+     直连 Supabase 拉取权威整包（sync_get，只读不写入），
+     经 normalize 字段级清洗后返回。
+     与页面当前内存数据无关：即使本机缓存过期 / 有离线改动，
+     导出的也是云端此刻的真实全量，适合随时随地做备份。 */
+  async function exportCloudPayload() {
+    if (mode !== 'cloud') { const e = new Error('LOCAL_MODE');     e.code = 'LOCAL_MODE';     throw e; }
+    if (!savedCode())     { const e = new Error('NOT_LOGGED_IN');  e.code = 'NOT_LOGGED_IN';  throw e; }
+    return normalize(await pull());
+  }
+
   /* 读取当前工作数据（app.js 通过 setDataProvider 注入读取器） */
   function readWorkingPayload() {
     if (!dataProvider) return null;
@@ -370,6 +381,7 @@
     onRefresh(cb) { onRefreshCb = cb; },
     setDataProvider(fn) { dataProvider = fn; },
     sanitizeArticle, sanitizeWeek,   // 导入路径复用同一套清洗
+    exportCloudPayload,              // v3.9 · 云端全量导出（sync_get 只读整包）
     /* app.js 每次数据变动后调用 */
     persist() {
       const payload = readWorkingPayload();

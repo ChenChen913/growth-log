@@ -108,11 +108,12 @@
         </div>
         <div class="export-card">
           <div class="export-title">数据管理</div>
-          <div class="export-desc">生成精美数据卡片分享，或导出/导入本地JSON备份文件。</div>
+          <div class="export-desc">生成精美数据卡片分享，或导出/导入 JSON 备份；云端模式下可一键拉取云端全量数据。</div>
           <div class="export-btns">
             <button class="btn-export" onclick="exportCard()">导出数据卡片</button>
             <button class="btn-export" onclick="exportDetailedData()" style="background:linear-gradient(135deg,#059952 0%,#047a42 100%);">导出详细数据</button>
-            <button class="btn-export-ghost" onclick="exportData()">导出 JSON 备份</button>
+            <button class="btn-export-ghost" onclick="exportData()">导出 JSON 备份（本机快照）</button>
+            <button class="btn-export-ghost" id="cloudExportBtn" onclick="exportCloudData(this)" style="border-color:rgba(7,193,96,0.55);color:#3ede8a;">导出云端全量数据</button>
             <button class="btn-export-ghost" onclick="triggerImport()" style="border-color:rgba(7,193,96,0.35);color:rgba(255,255,255,0.8);">导入历史数据</button>
             <button class="btn-export-ghost" onclick="openCloudInfo()">云端数据说明</button>
             <button class="btn-export-ghost" id="demoDataBtn" onclick="loadDemoData()">载入演示数据</button>
@@ -451,7 +452,7 @@
       <p class="ci-p">每条记录都会保存三个副本，层层兜底，缺了谁都不怕：</p>
       <div class="ci-row"><b>① 本设备浏览器</b><span>记录瞬间先存这里，断网也成功，秒级完成</span></div>
       <div class="ci-row"><b>② Supabase 云端</b><span>约 2 秒后自动整包上传，手机电脑共享同一份数据</span></div>
-      <div class="ci-row"><b>③ JSON 备份文件</b><span>手动导出的终极保险，建议每季度存一份到电脑 / 网盘</span></div>
+      <div class="ci-row"><b>③ JSON 备份文件</b><span>终极保险：「导出云端全量数据」直连云端拉取完整整包，建议每季度存一份到电脑 / 网盘</span></div>
     </div>
     <div class="ci-block">
       <div class="ci-h">断网或云端异常时</div>
@@ -461,13 +462,13 @@
       <div class="ci-h">保活与巡检</div>
       <div class="ci-row"><b>平时</b><span>什么都不用做，徽标显示「已同步」即一切正常</span></div>
       <div class="ci-row"><b>长期不用时</b><span>每 1~2 周点一次保活链接（只读操作，不产生写入）</span></div>
-      <div class="ci-row"><b>每季度</b><span>导出 JSON 备份 + 到 Supabase 控制台看一次用量</span></div>
+      <div class="ci-row"><b>每季度</b><span>导出云端全量备份 + 到 Supabase 控制台看一次用量</span></div>
       <button class="ci-copy" onclick="copyKeepalive()">复制保活链接（内含访问口令，切勿外传）</button>
     </div>
     <div class="ci-foot">与仓库文档 DATA.md 同源维护 · 数据流向 / 恢复方法详见 DATA.md</div>
     <div class="modal-footer">
       <button class="btn-cancel" onclick="closeCloudInfo()">我知道了</button>
-      <button class="btn-save" onclick="exportData(); closeCloudInfo();">立即导出 JSON 备份</button>
+      <button class="btn-save" onclick="exportCloudData(this); closeCloudInfo();">立即导出云端全量备份</button>
     </div>
   </div>
 </div>

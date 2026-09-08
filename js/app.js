@@ -619,6 +619,52 @@ function exportData() {
   try { localStorage.setItem('glog_last_backup', String(Date.now())); } catch (e) {}
 }
 
+/* v3.9 · 云端全量导出：直连 Supabase 拉取权威整包（sync_get 只读），
+   与本机缓存 / 内存状态无关，随时随地一键拿到云端此刻的完整数据。
+   导出结构与 exportData 完全一致（含 articles/weeks/avatar/tombstones），
+   可直接用「导入历史数据」在任何设备上合并恢复。 */
+let __cloudExportBusy = false;
+async function exportCloudData(btn) {
+  if (__cloudExportBusy) return;
+  __cloudExportBusy = true;
+  const LABEL = '导出云端全量数据';
+  if (btn) { btn.disabled = true; btn.textContent = '正在拉取云端数据…'; }
+  try {
+    const p = await Store.exportCloudPayload();
+    const filled = p.articles.filter(a => a.reads != null).length;
+    const payload = {
+      _meta: {
+        exportedAt: new Date().toISOString(),
+        appName: '公众号成长日志',
+        version: '3.1',
+        source: 'cloud',   // 标识：云端权威整包（区别于本机快照导出 version 3.0）
+        counts: { articles: p.articles.length, weeks: p.weeks.length, articlesWithReads: filled }
+      },
+      articles: p.articles,
+      weeks: p.weeks,
+      avatar: p.avatar || '',
+      tombstones: p.tombstones || []
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = '公众号成长日志_云端全量备份_' + new Date().toISOString().slice(0,10) + '.json';
+    a.click(); URL.revokeObjectURL(a.href);
+    try { localStorage.setItem('glog_last_backup', String(Date.now())); } catch (e) {}
+    Store.toast('云端全量备份已导出：' + p.articles.length + ' 篇文章 · ' + p.weeks.length + ' 条周报' + (filled ? '（含阅读量 ' + filled + ' 篇）' : ''), 'ok');
+  } catch (e) {
+    const map = {
+      LOCAL_MODE:    '当前是本地模式，没有云端数据可导出',
+      NOT_LOGGED_IN: '请先输入口令进入云端，再导出云端数据',
+      ACCESS_DENIED: '口令已失效，请刷新页面重新输入口令后再导出',
+      OFFLINE:       '网络不可用，请联网后再导出云端数据'
+    };
+    Store.toast(map[e.code] || ('导出失败：' + (e.detail || e.message || '未知错误')), 'err');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = LABEL; }
+    __cloudExportBusy = false;
+  }
+}
+
 function exportDetailedData() {
   const report = {
     _meta: { exportedAt: new Date().toISOString(), reportType: 'detailed', version: '2.0' },
