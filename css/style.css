@@ -329,6 +329,7 @@ body { font-family: var(--sans); background: var(--bg-base); color: var(--ink); 
 .sync-badge[data-state="ok"] .sync-dot { background: var(--green); box-shadow: 0 0 0 3px rgba(7,193,96,0.15); }
 .sync-badge[data-state="busy"] .sync-dot { background: #e8a838; animation: pulse 1.1s ease-in-out infinite; }
 .sync-badge[data-state="err"] .sync-dot { background: #e05252; box-shadow: 0 0 0 3px rgba(224,82,82,0.14); }
+.sync-badge[data-state="backup"] .sync-dot { background: #5b9bd5; box-shadow: 0 0 0 3px rgba(91,155,213,0.16); }
 .sync-badge[data-state="local"] .sync-dot { background: #a0aab8; }
 @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.45; transform: scale(0.8); } }
 

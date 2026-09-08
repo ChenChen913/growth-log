@@ -180,6 +180,30 @@
   const pull = () => rpc('sync_get', { p_code: savedCode() });
   const push = payload => rpc('sync_save', { p_code: savedCode(), p_payload: payload });
 
+  /* ─────────── v3.10 · 备份自动兜底 ───────────
+     云端不可达（断网 / Supabase 故障或休眠）且本机无缓存时，
+     自动加载随站点部署的 GitHub 最新备份（./backups/latest-cloud.json），
+     保证任何新设备打开网页，数据都能原原本本展示，不因云端故障而中断。
+     注意：口令错误（ACCESS_DENIED）不会走到这里，访问控制不被绕过；
+     备份模式下照常可记录，云端恢复后自动补传并回到实时同步。 */
+  async function tryBackupFallback(code) {
+    try {
+      const res = await fetch('./backups/latest-cloud.json', { cache: 'no-cache' });
+      if (!res.ok) return false;
+      const raw = await res.json();
+      const p = normalize(raw);
+      if (!p.articles.length && !p.weeks.length) return false;   // 空备份不兜底
+      writeCache(p, false);
+      if (code) { try { localStorage.setItem(LS.passcode, code); } catch (e) {} }   // 未经验证，云端恢复后首次验证自动纠错
+      hideGate();
+      bootNow(p);
+      const d = String((raw._meta && raw._meta.exportedAt) || '').slice(0, 10);
+      badge('backup', '云端暂不可用 · 展示 GitHub 备份' + (d ? '（' + d + '）' : ''), '备份模式');
+      toast('云端暂时连不上，已自动展示内置备份' + (d ? '（' + d + ' 数据时点）' : '') + '；云端恢复后自动回到实时同步', 'err');
+      return true;
+    } catch (e) { return false; }
+  }
+
   /* ─────────── 推送（防抖 + 失败暂存）─────────── */
   function schedulePush(delay) {
     clearTimeout(pushTimer);
@@ -287,6 +311,8 @@
            注意：不清空 currentPasscode —— 口令本就有效，只是网络不通，
            保留它才能让离线期间的改动在联网后正常补传。 */
         badge('err', '离线 · 正在显示缓存数据', '离线浏览中');
+      } else if (await tryBackupFallback(code)) {
+        /* 云端不可达且本机无缓存 → 自动降级展示 GitHub 内置备份，数据不中断 */
       } else {
         currentPasscode = null;
         showGate(e.code === 'OFFLINE'

@@ -4,7 +4,7 @@
    · 静态资源：缓存优先，后台更新
    · Supabase 云端 API：永不缓存
    ═══════════════════════════════════════════════════════ */
-const CACHE = 'glog-v3.9.cloudexport';
+const CACHE = 'glog-v3.10.bkfall';
 const CORE = [
   './',
   './index.html',
@@ -45,6 +45,24 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.hostname.includes('supabase')) return;   // 云端数据永走网络
+
+  /* GitHub 内置备份快照：网络优先 —— 保证尽量展示最新一次备份；
+     断网 / Pages 不可达时回退上次缓存，高可用兜底 */
+  if (url.pathname.includes('/backups/latest-')) {
+    e.respondWith(
+      fetch(req)
+        .then(res => {
+          if (res.ok) {
+            const copy = res.clone();
+            caches.open(CACHE).then(c => c.put(req, copy));
+            return res;
+          }
+          return caches.match(req);
+        })
+        .catch(() => caches.match(req))
+    );
+    return;
+  }
 
   /* config.js：网络优先 —— 用户修改云端配置后立即生效；非 200 回退缓存（防私有化 404 污染） */
   if (url.pathname.endsWith('/js/config.js')) {
