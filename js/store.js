@@ -47,7 +47,21 @@
     if (!b || !t) return;
     b.dataset.state = state;                 // ok | busy | err | local
     b.title = text;
-    t.textContent = short || text;
+    const s = short || text;
+    /* 末尾时间（如「已同步 13:28」）拆为 .sync-time span：≤420px 窄屏隐藏时间保「已同步」，
+       避免徽标挤压 logo 标题（v3.11 小屏溢出修复配套） */
+    const m = s.match(/^(.*?)[\s\u00a0]?(\d{1,2}:\d{2})$/);
+    if (m && m[1]) {
+      t.textContent = '';
+      const label = document.createElement('span');
+      label.textContent = m[1].trim();
+      const tm = document.createElement('span');
+      tm.className = 'sync-time';
+      tm.textContent = ' ' + m[2];
+      t.appendChild(label); t.appendChild(tm);
+    } else {
+      t.textContent = s;
+    }
     b.classList.add('show');
   }
 

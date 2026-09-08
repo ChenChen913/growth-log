@@ -27,7 +27,8 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+/* overflow-x 同锁 html 层：移动端浏览器仅在 body 设 hidden 时仍可拖动页面（经典失效场景），双层才能彻底禁止横向滑动 */
+html { scroll-behavior: smooth; overflow-x: hidden; }
 canvas { max-width: 100%; }
 body { font-family: var(--sans); background: var(--bg-base); color: var(--ink); min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased; font-size: 15px; line-height: 1.6; position: relative; }
 
@@ -399,17 +400,26 @@ body { font-family: var(--sans); background: var(--bg-base); color: var(--ink); 
 ════════════════════════════════════════════════════ */
 @media (max-width: 820px) {
   /* ── 头部 ── */
+  /* v3.11 修复小屏横向溢出：flex 子项默认 min-width:auto（收缩下限=内容宽），
+     同步徽标 + 「记录文章」按钮 + 标题在 ≤380px 屏总宽挤爆 header，右侧按钮被裁且页面可左右滑动；
+     全链路放开 min-width:0，空间不足时按比例收缩徽标与标题（ellipsis 兜底），按钮永不裁切 */
   .header-inner { padding: 0 14px; height: 62px; gap: 8px; }
-  .logo { gap: 10px; }
+  .logo { gap: 10px; min-width: 0; }
   .logo-avatar-wrap, .logo-avatar, .logo-avatar-default { width: 38px; height: 38px; }
   .logo-avatar-default img { border-radius: 10px; }
   .logo-tagline { display: none; }
   .logo-name { font-size: 16px; white-space: nowrap; max-width: 34vw; overflow: hidden; text-overflow: ellipsis; }
-  .header-actions { gap: 6px; }
+  .logo-text { min-width: 0; }
+  .header-actions { gap: 6px; min-width: 0; }
   .header-actions .btn-ghost { display: none; }          /* 小屏收纳：周报面板内仍有入口 */
-  .header-actions .btn { padding: 9px 14px; font-size: 13px; }
-  .sync-badge { padding: 6px 10px; font-size: 11px; max-width: 40vw; overflow: hidden; }
-  .sync-badge .sync-text { overflow: hidden; text-overflow: ellipsis; }
+  .header-actions .btn { padding: 9px 14px; font-size: 13px; flex-shrink: 0; }
+  .sync-badge { padding: 6px 10px; font-size: 11px; max-width: 40vw; overflow: hidden; min-width: 0; flex-shrink: 1; }
+  .sync-badge .sync-text { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  /* ≤420px：同步徽标隐去时间只留状态词，360px 主流宽度下 logo 全名 + 徽标 + 按钮三者完整共存 */
+  @media (max-width: 420px) {
+    .sync-badge { padding: 6px 9px; }
+    .sync-badge .sync-time { display: none; }
+  }
 
   /* ── 页面容器 & Tabs ── */
   .page { padding: 18px 14px 96px; }
