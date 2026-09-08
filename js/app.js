@@ -71,6 +71,7 @@ function switchTab(name, el) {
   if (name === 'articles') renderArticleTable();
   if (name === 'weeks') { renderWeekList(); renderTrendLine(); }
   if (name === 'monthly') renderMonthly();
+  if (name === 'insights') renderInsights();
   checkBackToTop();
 }
 
@@ -90,6 +91,7 @@ function renderOverview() {
   renderTypeChart();
   renderAIChart(); 
   renderTypeSummary();
+  renderInsightHero();
 }
 
 let currentTypeChart = 'bar';
@@ -135,6 +137,212 @@ function renderTypeSummary() {
 }
 
 /* ========================================
+   v3.8 · 统计洞察（总览洞察卡 + 周维度 + 单篇维度）
+======================================== */
+function readReadsInput(id) {
+  const el = document.getElementById(id);
+  if (!el) return null;
+  const v = String(el.value).trim();
+  if (v === '') return null;
+  const n = Math.round(Number(v));
+  return (isFinite(n) && n >= 0) ? Math.min(n, 1e12) : null;
+}
+
+function renderInsightHero() {
+  const totalReads = weeks.reduce((s,w) => s + (w.reads||0), 0);
+  const withReads = articles.filter(a => typeof a.reads === 'number' && isFinite(a.reads));
+  document.getElementById('io-avg').textContent = articles.length ? numFmt(Math.round(totalReads / articles.length)) : '0';
+  const topEl = document.getElementById('io-top'),  topSub = document.getElementById('io-top-sub');
+  const lowEl = document.getElementById('io-low'),  lowSub = document.getElementById('io-low-sub');
+  if (withReads.length) {
+    let top = withReads[0], low = withReads[0];
+    withReads.forEach(a => { if (a.reads > top.reads) top = a; if (a.reads < low.reads) low = a; });
+    const topT = top.title || '（无标题）', lowT = low.title || '（无标题）';
+    topEl.textContent = numFmt(top.reads);  topSub.textContent = topT;
+    topSub.title = topT + ' · ' + fmtDatetime(top.datetime).slice(0, 10);
+    lowEl.textContent = numFmt(low.reads);  lowSub.textContent = lowT;
+    lowSub.title = lowT + ' · ' + fmtDatetime(low.datetime).slice(0, 10);
+  } else {
+    topEl.textContent = '—'; topSub.textContent = '补录阅读量后自动出现'; topSub.title = '';
+    lowEl.textContent = '—'; lowSub.textContent = '补录阅读量后自动出现'; lowSub.title = '';
+  }
+  const covEl = document.getElementById('io-cov'), covSub = document.getElementById('io-cov-sub');
+  if (articles.length) {
+    covEl.textContent = Math.round(withReads.length / articles.length * 100) + '%';
+    covSub.textContent = '已填 ' + withReads.length + ' / ' + articles.length + ' 篇';
+  } else { covEl.textContent = '—'; covSub.textContent = '填阅读量后更准'; }
+}
+
+let distChartInst = null, origChartInst = null, aiReadInst = null;
+const READ_BUCKETS = [
+  { label: '<100',      min: 0,    max: 99 },
+  { label: '100~499',   min: 100,  max: 499 },
+  { label: '500~999',   min: 500,  max: 999 },
+  { label: '1000~4999', min: 1000, max: 4999 },
+  { label: '5000+',     min: 5000, max: Infinity }
+];
+
+function med(arr) {
+  if (!arr.length) return 0;
+  const s = [...arr].sort((a,b) => a-b), m = Math.floor(s.length/2);
+  return s.length % 2 ? s[m] : Math.round((s[m-1]+s[m])/2);
+}
+
+function avgReadsOf(list) {
+  if (!list.length) return 0;
+  return Math.round(list.reduce((s,a) => s + a.reads, 0) / list.length);
+}
+
+function withReadsArticles() {
+  return articles.filter(a => typeof a.reads === 'number' && isFinite(a.reads));
+}
+
+function renderInsights() {
+  renderWeekInsights();
+  renderTop10();
+  renderDistChart();
+  renderOrigChart();
+  renderAiReadChart();
+}
+
+function renderWeekInsights() {
+  const box = document.getElementById('weekInsights');
+  if (!box) return;
+  if (!weeks.length) {
+    box.innerHTML = '<div class="empty-tip" style="grid-column:1/-1"><strong>暂无周报数据</strong>记录周报后，这里会给出整体节奏分析</div>';
+    return;
+  }
+  const totalReads  = weeks.reduce((s,w) => s + (w.reads||0), 0);
+  const totalShares = weeks.reduce((s,w) => s + (w.shares||0), 0);
+  const totalNew    = weeks.reduce((s,w) => s + (w.newfans||0), 0);
+  const totalPost   = weeks.reduce((s,w) => s + (w.article||0)+(w.imgtext||0)+(w.video||0)+(w.audio||0), 0);
+  let best = weeks[0], worst = weeks[0];
+  weeks.forEach(w => { if ((w.reads||0) > (best.reads||0)) best = w; if ((w.reads||0) < (worst.reads||0)) worst = w; });
+  const readsArr = weeks.map(w => w.reads||0);
+  let maxGap = null;
+  const byDate = [...weeks].sort((a,b) => (a._sortTs||a._ts) - (b._sortTs||b._ts));
+  for (let i = 1; i < byDate.length; i++) {
+    const d = Math.round(((byDate[i]._sortTs||byDate[i]._ts) - (byDate[i-1]._sortTs||byDate[i-1]._ts)) / 86400000);
+    if (maxGap === null || d > maxGap) maxGap = d;
+  }
+  const cards = [
+    { label: '最佳一周',     value: numFmt(best.reads||0),  sub: best.label || '—' },
+    { label: '最低一周',     value: numFmt(worst.reads||0), sub: worst.label || '—' },
+    { label: '周中位数阅读', value: numFmt(med(readsArr)),                sub: '不易被单周爆点拉偏' },
+    { label: '周均阅读',     value: numFmt(Math.round(totalReads / weeks.length)), sub: weeks.length + ' 周平均' },
+    { label: '周均发文',     value: (totalPost / weeks.length).toFixed(1), sub: '篇 / 周 · 按周报合计' },
+    { label: '最长间隔',     value: maxGap === null ? '—' : maxGap + ' 天', sub: '相邻周报最大间隔' },
+    { label: '分享率',       value: totalReads > 0 ? (totalShares / totalReads * 100).toFixed(1) + '%' : '—', sub: '分享 ÷ 阅读' },
+    { label: '千次阅读涨粉', value: totalReads > 0 ? (totalNew / totalReads * 1000).toFixed(1) : '—',  sub: '新增粉丝 ÷ 阅读 × 1000' }
+  ];
+  box.innerHTML = cards.map(c => '<div class="stat-hero-card sm"><div class="stat-label">' + c.label + '</div><div class="stat-value">' + c.value + '</div><div class="stat-sub stat-title-sub" title="' + esc(c.sub) + '">' + esc(c.sub) + '</div></div>').join('');
+}
+
+function renderTop10() {
+  const list = document.getElementById('top10List');
+  if (!list) return;
+  const withReads = withReadsArticles();
+  const covNote = document.getElementById('insCovNote');
+  if (covNote) covNote.textContent = articles.length
+    ? '已填阅读量 ' + withReads.length + ' / ' + articles.length + ' 篇 · 未填不参与'
+    : '按已填阅读量统计，未填不参与';
+  const meta = document.getElementById('top10Meta');
+  if (meta) meta.textContent = withReads.length ? '按累计阅读排序' : '';
+  if (!withReads.length) {
+    list.innerHTML = '<div class="empty-tip"><strong>还没有文章填写阅读量</strong>点击右上角「快速补录阅读量」开始，补一篇自动进榜</div>';
+    return;
+  }
+  const sorted = [...withReads].sort((a,b) => b.reads - a.reads).slice(0, 10);
+  const maxR = sorted[0].reads || 1;
+  list.innerHTML = sorted.map((a, i) => `
+    <div class="rk-row">
+      <div class="rk-rank ${i < 3 ? 'rk-' + (i+1) : ''}">${i+1}</div>
+      <div class="rk-main"><div class="rk-title">${esc(a.title) || '（无标题）'}</div><div class="rk-date">${fmtDatetime(a.datetime).slice(0, 10)} · ${a.original !== 0 ? '原创' : '转载'} · ${TYPE_MAP[a.type] || ''}</div></div>
+      <div class="rk-right"><div class="rk-val">${numFmt(a.reads)}</div><div class="rk-bar"><i style="width:${Math.max(4, Math.round(a.reads / maxR * 100))}%"></i></div></div>
+    </div>`).join('');
+}
+
+function toggleChartEmpty(canvasId, emptyId, hasData, inst) {
+  const canvas = document.getElementById(canvasId), empty = document.getElementById(emptyId);
+  if (!canvas) return null;
+  if (inst) { inst.destroy(); }
+  if (!hasData) { canvas.style.display = 'none'; if (empty) empty.style.display = 'block'; return null; }
+  canvas.style.display = 'block'; if (empty) empty.style.display = 'none';
+  return canvas;
+}
+
+function renderDistChart() {
+  const canvas = toggleChartEmpty('distChart', 'distEmpty', withReadsArticles().length > 0, distChartInst);
+  distChartInst = null;
+  if (!canvas) return;
+  const withReads = withReadsArticles();
+  const counts = READ_BUCKETS.map(b => withReads.filter(a => a.reads >= b.min && a.reads <= b.max).length);
+  distChartInst = new Chart(canvas.getContext('2d'), { type: 'bar', data: { labels: READ_BUCKETS.map(b => b.label), datasets: [{ data: counts, backgroundColor: ['#a8d8ba','#7cc79a','#07C160','#059952','#047a42'], borderRadius: 8, maxBarThickness: 46 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(28,33,40,0.88)', padding: 12, callbacks: { label: ctx => ctx.parsed.y + ' 篇' } } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, ticks: { precision: 0 } } } } });
+}
+
+function renderOrigChart() {
+  const canvas = toggleChartEmpty('origChart', 'origEmpty', withReadsArticles().length > 0, origChartInst);
+  origChartInst = null;
+  if (!canvas) return;
+  const withReads = withReadsArticles();
+  const orig = withReads.filter(a => a.original !== 0), repost = withReads.filter(a => a.original === 0);
+  origChartInst = new Chart(canvas.getContext('2d'), { type: 'bar', data: { labels: ['原创（' + orig.length + ' 篇）', '转载（' + repost.length + ' 篇）'], datasets: [{ data: [avgReadsOf(orig), avgReadsOf(repost)], backgroundColor: ['#07C160','#5b9bd5'], borderRadius: 8, maxBarThickness: 64 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(28,33,40,0.88)', padding: 12, callbacks: { label: ctx => '平均 ' + ctx.parsed.y + ' 阅读' } } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true } } } });
+}
+
+function renderAiReadChart() {
+  const canvas = toggleChartEmpty('aiReadChart', 'aiReadEmpty', withReadsArticles().length > 0, aiReadInst);
+  aiReadInst = null;
+  if (!canvas) return;
+  const withReads = withReadsArticles();
+  const groups = [0, 1, 2].map(lv => withReads.filter(a => (a.aiUsage || 0) === lv));
+  aiReadInst = new Chart(canvas.getContext('2d'), { type: 'bar', data: { labels: ['未使用（' + groups[0].length + ' 篇）', '轻度使用（' + groups[1].length + ' 篇）', '高度使用（' + groups[2].length + ' 篇）'], datasets: [{ data: groups.map(avgReadsOf), backgroundColor: AI_COLORS, borderRadius: 8, maxBarThickness: 64 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(28,33,40,0.88)', padding: 12, callbacks: { label: ctx => '平均 ' + ctx.parsed.y + ' 阅读' } } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true } } } });
+}
+
+/* ── v3.8 · 快速补录阅读量 ── */
+let qfOrder = [];
+function openQuickFill() {
+  const sorted = [...articles].sort((a,b) => new Date(b.datetime || 0) - new Date(a.datetime || 0));
+  qfOrder = sorted.map(a => a._ts);
+  const list = document.getElementById('qfList');
+  if (!sorted.length) {
+    list.innerHTML = '<div class="empty-tip"><strong>还没有文章记录</strong>先在文章记录页添加文章，再回来补录阅读量</div>';
+  } else {
+    list.innerHTML = sorted.map((a, i) => `
+      <div class="qf-row">
+        <div class="qf-info"><div class="qf-title">${esc(a.title) || '（无标题）'}</div><div class="qf-date">${fmtDatetime(a.datetime)}</div></div>
+        <input class="qf-input" type="number" min="0" step="1" inputmode="numeric" id="qfi-${i}" placeholder="未填" value="${a.reads == null ? '' : a.reads}">
+      </div>`).join('');
+    list.oninput = refreshQfProgress;
+  }
+  refreshQfProgress();
+  document.getElementById('quickFillOverlay').classList.add('show');
+}
+function closeQuickFill() { document.getElementById('quickFillOverlay').classList.remove('show'); }
+function refreshQfProgress() {
+  const inputs = document.querySelectorAll('#qfList .qf-input');
+  let n = 0; inputs.forEach(inp => { if (String(inp.value).trim() !== '') n++; });
+  document.getElementById('qfCount').textContent = n;
+  document.getElementById('qfTotal').textContent = inputs.length;
+  document.getElementById('qfProgressFill').style.width = (inputs.length ? Math.round(n / inputs.length * 100) : 0) + '%';
+}
+function saveQuickFill() {
+  let changed = 0;
+  qfOrder.forEach((ts, i) => {
+    const inp = document.getElementById('qfi-' + i);
+    if (!inp) return;
+    const a = articles.find(x => x._ts === ts);
+    if (!a) return;
+    const v = String(inp.value).trim();
+    const val = (v === '') ? null : Math.min(Math.max(Math.round(Number(v)) || 0, 0), 1e12);
+    if (a.reads !== val) { a.reads = val; changed++; }
+  });
+  persist(); closeQuickFill();
+  renderArticleTable(); renderOverview();
+  if (document.getElementById('panel-insights').classList.contains('active')) renderInsights();
+  Store.toast('已保存 ' + changed + ' 篇阅读量', 'ok');
+}
+
+/* ========================================
    ARTICLE TABLE
 ======================================== */
 let currentFilter = 'all';
@@ -155,6 +363,7 @@ function renderArticleTable() {
   if (searchSort === 'time_desc')      filtered.sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
   else if (searchSort === 'time_asc')  filtered.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
   else if (searchSort === 'title_asc') filtered.sort((a, b) => (a.title || '').localeCompare(b.title || '', 'zh-Hans-CN'));
+  else if (searchSort === 'reads_desc') filtered.sort((a, b) => (b.reads ?? -1) - (a.reads ?? -1));
 
   const chip = document.getElementById('articleCount');
   if (chip) {
@@ -177,6 +386,7 @@ function renderArticleTable() {
       <div><span class="art-type-badge ${TYPE_BG[a.type] || 'badge-article'}">${TYPE_MAP[a.type] || esc(a.type)}</span></div>
       <div>${a.original !== 0 ? '<span class="badge-original">原创</span>' : '<span class="badge-repost">转载</span>'}</div>
       <div><span class="badge-ai ${AI_BG[a.aiUsage || 0]}">${AI_MAP[a.aiUsage || 0]}</span></div>
+      <div class="art-reads">${a.reads == null ? '—' : numFmt(a.reads)}</div>
       <div class="art-date">${fmtDatetime(a.datetime)}</div>
       <div class="art-actions">
         <button class="edit-btn" onclick="openEditArticleModal(${Number(a._ts) || 0})">编辑</button>
@@ -195,6 +405,7 @@ function deleteArticle(ts) {
 function openArticleModal() {
   const now = new Date(); document.getElementById('a_datetime').value = new Date(now - now.getTimezoneOffset()*60000).toISOString().slice(0,16);
   document.getElementById('a_title').value = ''; document.getElementById('a_type').value = 'article';
+  document.getElementById('a_reads').value = '';
   document.getElementById('a_original_yes').checked = true; document.getElementById('a_ai_0').checked = true;
   document.getElementById('articleOverlay').classList.add('show');
 }
@@ -203,7 +414,7 @@ function saveArticle() {
   const title = document.getElementById('a_title').value.trim(); const type = document.getElementById('a_type').value; const datetime = document.getElementById('a_datetime').value; const original = document.getElementById('a_original_yes').checked ? 1 : 0;
   let aiUsage = 0; if (document.getElementById('a_ai_1').checked) aiUsage = 1; if (document.getElementById('a_ai_2').checked) aiUsage = 2;
   if (!title) { alert('请填写文章标题'); return; } if (!datetime) { alert('请选择发布时间'); return; }
-  articles.push({ _ts: Date.now(), title, type, datetime, original, aiUsage });
+  articles.push({ _ts: Date.now(), title, type, datetime, original, aiUsage, reads: readReadsInput('a_reads') });
   persist(); closeArticleModal(); renderArticleTable(); renderOverview();
 }
 
@@ -212,6 +423,7 @@ function openEditArticleModal(ts) {
   document.getElementById('ea_ts').value = ts; document.getElementById('ea_title').value = a.title || '';
   document.getElementById('ea_type').value = a.type || 'article'; document.getElementById('ea_datetime').value = a.datetime || '';
   if (a.original !== 0) document.getElementById('ea_original_yes').checked = true; else document.getElementById('ea_original_no').checked = true;
+  document.getElementById('ea_reads').value = (a.reads == null ? '' : a.reads);
   document.getElementById('ea_ai_' + (a.aiUsage || 0)).checked = true;
   document.getElementById('editArticleOverlay').classList.add('show');
 }
@@ -221,7 +433,7 @@ function updateArticle() {
   if (idx === -1) { alert('找不到该记录'); return; }
   const title = document.getElementById('ea_title').value.trim(); const type = document.getElementById('ea_type').value; const datetime = document.getElementById('ea_datetime').value; const original = document.getElementById('ea_original_yes').checked ? 1 : 0;
   let aiUsage = 0; if (document.getElementById('ea_ai_1').checked) aiUsage = 1; if (document.getElementById('ea_ai_2').checked) aiUsage = 2;
-  articles[idx] = { ...articles[idx], title, type, datetime, original, aiUsage };
+  articles[idx] = { ...articles[idx], title, type, datetime, original, aiUsage, reads: readReadsInput('ea_reads') };
   persist(); closeEditArticleModal(); renderArticleTable(); renderOverview();
 }
 
@@ -410,10 +622,16 @@ function exportData() {
 function exportDetailedData() {
   const report = {
     _meta: { exportedAt: new Date().toISOString(), reportType: 'detailed', version: '2.0' },
-    summary: { 总周数: weeks.length, 总文章数: articles.length },
+    summary: {
+      总周数: weeks.length, 总文章数: articles.length,
+      已填阅读量: withReadsArticles().length + ' / ' + articles.length + ' 篇',
+      单篇最高: (function(){ const w = withReadsArticles(); if (!w.length) return '暂无'; let t = w[0]; w.forEach(a => { if (a.reads > t.reads) t = a; }); return t.title + '（' + t.reads + ' 阅读）'; })(),
+      单篇最低: (function(){ const w = withReadsArticles(); if (!w.length) return '暂无'; let l = w[0]; w.forEach(a => { if (a.reads < l.reads) l = a; }); return l.title + '（' + l.reads + ' 阅读）'; })()
+    },
     articles: articles.map(a => ({
       标题: a.title, 类型: TYPE_MAP[a.type] || a.type, 是否原创: a.original !== 0 ? '原创' : '转载',
-      AI辅助: AI_MAP[a.aiUsage || 0], 发布时间: a.datetime ? new Date(a.datetime).toLocaleString('zh-CN') : '未记录'
+      AI辅助: AI_MAP[a.aiUsage || 0], 阅读量: a.reads == null ? '未填' : a.reads,
+      发布时间: a.datetime ? new Date(a.datetime).toLocaleString('zh-CN') : '未记录'
     })),
     weeks: weeks.map(w => ({ 周名称: w.label, 日期范围: w.range, 阅读量: w.reads, 新增粉丝: w.newfans }))
   };
@@ -448,7 +666,7 @@ function importData(event) {
 
 /* ========================================
    MODAL OVERLAY CLICK CLOSE
-======================================== */['articleOverlay','editArticleOverlay','weekOverlay','editWeekOverlay','cardPreviewOverlay'].forEach(id => {
+======================================== */['articleOverlay','editArticleOverlay','weekOverlay','editWeekOverlay','cardPreviewOverlay','quickFillOverlay'].forEach(id => {
   document.getElementById(id)?.addEventListener('click', function(e) {
     if (e.target === this) this.classList.remove('show');
   });
@@ -503,7 +721,7 @@ function loadDemoData() {
   const types = ['article', 'article', 'imgtext', 'article', 'video', 'article', 'imgtext'];
   titles.forEach((t, i) => {
     const d = new Date(now); d.setDate(now.getDate() - Math.floor(i * 6.2) - (i % 3));
-    articles.push({ _ts: Date.now() + i, title: t, type: types[i % types.length], datetime: d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(9 + (i % 10)) + ':' + pad((i * 17) % 60), original: i % 5 === 0 ? 0 : 1, aiUsage: [0, 1, 1, 0, 2, 1, 0, 2][i % 8] });
+    articles.push({ _ts: Date.now() + i, title: t, type: types[i % types.length], datetime: d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(9 + (i % 10)) + ':' + pad((i * 17) % 60), original: i % 5 === 0 ? 0 : 1, aiUsage: [0, 1, 1, 0, 2, 1, 0, 2][i % 8], reads: i === 0 ? 8600 : 90 + (i * 613) % 3800 });
   });
   for (let i = 9; i >= 0; i--) {
     const monday = new Date(now); const day = now.getDay() || 7; monday.setDate(now.getDate() - day + 1 - i * 7);
@@ -574,6 +792,7 @@ Store.onRefresh(function(payload) {
   renderWeekList();
   renderTrendLine();
   if (document.getElementById('panel-monthly').classList.contains('active') && typeof renderMonthly === 'function') renderMonthly();
+  if (document.getElementById('panel-insights').classList.contains('active')) renderInsights();
 });
 
 /* ========================================

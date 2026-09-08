@@ -4,7 +4,7 @@
    · 静态资源：缓存优先，后台更新
    · Supabase 云端 API：永不缓存
    ═══════════════════════════════════════════════════════ */
-const CACHE = 'glog-v3.7.fulltext';
+const CACHE = 'glog-v3.8.insights';
 const CORE = [
   './',
   './index.html',

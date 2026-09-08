@@ -53,6 +53,7 @@
     <button class="tab" onclick="switchTab('articles', this)">文章记录</button>
     <button class="tab" onclick="switchTab('weeks', this)">周报告</button>
     <button class="tab" onclick="switchTab('monthly', this)">月度年度</button>
+    <button class="tab" onclick="switchTab('insights', this)">统计洞察</button>
   </div>
 
   <!-- ══ PANEL: OVERVIEW ══ -->
@@ -62,6 +63,14 @@
       <div class="stat-hero-card"><div class="stat-label">已记录文章</div><div class="stat-value" id="s-articles">0</div><div class="stat-sub">条内容记录</div></div>
       <div class="stat-hero-card"><div class="stat-label">累计分享</div><div class="stat-value" id="s-shares">0</div><div class="stat-sub">次分享合计</div></div>
       <div class="stat-hero-card"><div class="stat-label">已记录周数</div><div class="stat-value" id="s-weeks">0</div><div class="stat-sub">周报告</div></div>
+    </div>
+
+    <!-- v3.8 · 阅读量洞察卡行 -->
+    <div class="stats-hero" style="margin-bottom:20px;">
+      <div class="stat-hero-card"><div class="stat-label">平均每篇阅读</div><div class="stat-value" id="io-avg">0</div><div class="stat-sub">总阅读 ÷ 内容数 · 估算</div></div>
+      <div class="stat-hero-card"><div class="stat-label">最高单篇</div><div class="stat-value" id="io-top">—</div><div class="stat-sub stat-title-sub" id="io-top-sub">补录阅读量后自动出现</div></div>
+      <div class="stat-hero-card"><div class="stat-label">最低单篇</div><div class="stat-value" id="io-low">—</div><div class="stat-sub stat-title-sub" id="io-low-sub">补录阅读量后自动出现</div></div>
+      <div class="stat-hero-card"><div class="stat-label">单篇已统计</div><div class="stat-value" id="io-cov">—</div><div class="stat-sub" id="io-cov-sub">填阅读量后更准</div></div>
     </div>
 
     <div class="layout-cols">
@@ -132,7 +141,10 @@
         <button class="filter-pill" onclick="filterArticles('video', this)">视频</button>
         <button class="filter-pill" onclick="filterArticles('audio', this)">音频</button>
       </div>
-      <button class="btn btn-primary" onclick="openArticleModal()">记录文章</button>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-ghost" onclick="openQuickFill()">快速补录</button>
+        <button class="btn btn-primary" onclick="openArticleModal()">记录文章</button>
+      </div>
     </div>
     <div class="article-searchbar">
       <input class="search-input" id="articleSearch" type="text" placeholder="搜索文章标题…">
@@ -141,13 +153,14 @@
         <option value="time_desc">最新发布优先</option>
         <option value="time_asc">最早发布优先</option>
         <option value="title_asc">标题 A → Z</option>
+        <option value="reads_desc">阅读量从高到低</option>
       </select>
       <button class="search-clear" onclick="clearArticleSearch()">重置</button>
     </div>
     <div class="result-chip" id="articleCount"></div>
     <div class="article-table-wrap">
       <div class="table-head">
-        <div>文章标题</div><div>类型</div><div>原创</div><div>AI参与</div><div>发布时间</div><div>操作</div>
+        <div>文章标题</div><div>类型</div><div>原创</div><div>AI参与</div><div>阅读量</div><div>发布时间</div><div>操作</div>
       </div>
       <div id="articleTableBody"></div>
     </div>
@@ -209,6 +222,43 @@
     <div class="month-grid" id="monthGrid" style="margin-top:20px;"></div>
   </div>
 
+  <!-- ══ PANEL: INSIGHTS（v3.8 统计洞察）══ -->
+  <div class="panel" id="panel-insights">
+    <div class="month-toolbar">
+      <div class="section-title">统计洞察</div>
+      <button class="btn btn-ghost" onclick="openQuickFill()">快速补录阅读量</button>
+    </div>
+
+    <div class="insights-sub">周维度<span class="insights-note">来自周报合计 · 反映整体节奏</span></div>
+    <div class="ins-grid" id="weekInsights"></div>
+
+    <div class="insights-sub">单篇维度<span class="insights-note" id="insCovNote">按已填阅读量统计，未填不参与</span></div>
+    <div class="cols-2">
+      <div class="chart-card">
+        <div class="chart-head"><span class="chart-title">单篇阅读 TOP10</span><span class="chart-meta" id="top10Meta"></span></div>
+        <div id="top10List"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-head"><span class="chart-title">阅读量分层分布</span><span class="chart-meta">已填阅读量文章</span></div>
+        <div class="chart-wrap"><canvas id="distChart"></canvas></div>
+        <div class="empty-tip" id="distEmpty" style="display:none"><strong>暂无单篇阅读数据</strong>在文章记录里填写阅读量后自动生成</div>
+      </div>
+    </div>
+    <div class="cols-2">
+      <div class="chart-card">
+        <div class="chart-head"><span class="chart-title">原创 vs 转载 · 平均阅读</span><span class="chart-meta">按已填阅读量</span></div>
+        <div class="chart-wrap"><canvas id="origChart"></canvas></div>
+        <div class="empty-tip" id="origEmpty" style="display:none"><strong>暂无单篇阅读数据</strong>在文章记录里填写阅读量后自动生成</div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-head"><span class="chart-title">AI 参与度 × 平均阅读</span><span class="chart-meta">按已填阅读量</span></div>
+        <div class="chart-wrap"><canvas id="aiReadChart"></canvas></div>
+        <div class="empty-tip" id="aiReadEmpty" style="display:none"><strong>暂无单篇阅读数据</strong>在文章记录里填写阅读量后自动生成</div>
+      </div>
+    </div>
+    <div class="ins-foot">口径说明：周维度指标按周报合计；单篇阅读量为记录时点的累计阅读量（公众号后台口径），可随时编辑更新，未填写的文章不参与单篇统计。</div>
+  </div>
+
 </main>
 
 <!-- 回到顶部按钮 -->
@@ -227,6 +277,7 @@
       <div class="form-group"><label class="form-label">内容类型</label><select class="form-select" id="a_type"><option value="article">文章</option><option value="imgtext">图文</option><option value="video">视频</option><option value="audio">音频</option></select></div>
       <div class="form-group"><label class="form-label">发布日期与时间</label><input class="form-input" id="a_datetime" type="datetime-local"></div>
     </div>
+    <div class="form-group"><label class="form-label">累计阅读量（选填 · 公众号后台口径）</label><input class="form-input" id="a_reads" type="number" min="0" inputmode="numeric" placeholder="留空表示暂不统计"></div>
     <div class="form-group"><label class="form-label">是否原创</label>
       <div style="display:flex;gap:12px;margin-top:4px;">
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:var(--ink-mid);padding:10px 18px;border:1.5px solid rgba(0,0,0,0.1);border-radius:8px;flex:1;"><input type="radio" name="a_original" id="a_original_yes" value="1" style="accent-color:var(--green);width:16px;height:16px;" checked> 原创内容</label>
@@ -254,6 +305,7 @@
       <div class="form-group"><label class="form-label">内容类型</label><select class="form-select" id="ea_type"><option value="article">文章</option><option value="imgtext">图文</option><option value="video">视频</option><option value="audio">音频</option></select></div>
       <div class="form-group"><label class="form-label">发布日期与时间</label><input class="form-input" id="ea_datetime" type="datetime-local"></div>
     </div>
+    <div class="form-group"><label class="form-label">累计阅读量（选填 · 公众号后台口径）</label><input class="form-input" id="ea_reads" type="number" min="0" inputmode="numeric" placeholder="留空表示暂不统计"></div>
     <div class="form-group"><label class="form-label">是否原创</label>
       <div style="display:flex;gap:12px;margin-top:4px;">
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;padding:10px 18px;border:1.5px solid rgba(0,0,0,0.1);border-radius:8px;flex:1;"><input type="radio" name="ea_original" id="ea_original_yes" value="1" style="accent-color:var(--green);width:16px;height:16px;"> 原创内容</label>
@@ -416,6 +468,20 @@
     <div class="modal-footer">
       <button class="btn-cancel" onclick="closeCloudInfo()">我知道了</button>
       <button class="btn-save" onclick="exportData(); closeCloudInfo();">立即导出 JSON 备份</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: QUICK FILL（v3.8 快速补录阅读量）══ -->
+<div class="overlay" id="quickFillOverlay">
+  <div class="modal">
+    <div class="modal-title">快速补录阅读量</div>
+    <div class="qf-tip">从公众号后台查一篇填一篇，历史文章可慢慢补；留空表示未统计。已填 <b id="qfCount">0</b> / 共 <b id="qfTotal">0</b> 篇</div>
+    <div class="qf-progress"><div class="qf-progress-fill" id="qfProgressFill"></div></div>
+    <div class="qf-list" id="qfList"></div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeQuickFill()">取消</button>
+      <button class="btn-save" onclick="saveQuickFill()">保存全部</button>
     </div>
   </div>
 </div>

@@ -94,7 +94,9 @@
       type: WEEK_TYPES.includes(a.type) ? a.type : 'article',
       datetime: sStr(a.datetime, 32),
       original: a.original === 0 ? 0 : 1,
-      aiUsage: [0,1,2].includes(a.aiUsage) ? a.aiUsage : 0
+      aiUsage: [0,1,2].includes(a.aiUsage) ? a.aiUsage : 0,
+      /* v3.8 · 单篇累计阅读量（选填；null = 未统计，不参与单篇榜单） */
+      reads: (a.reads == null || a.reads === '') ? null : sInt(a.reads, 0, 1e12)
     };
   }
   function sanitizeWeek(w) {
