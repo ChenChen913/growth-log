@@ -1,14 +1,15 @@
 {
   "_meta": {
-    "exportedAt": "2026-09-08T12:48:53.154Z",
+    "exportedAt": "2026-09-14T09:15:56.052Z",
     "appName": "公众号成长日志",
     "version": "3.1",
     "source": "cloud",
     "counts": {
       "articles": 88,
-      "weeks": 30,
+      "weeks": 31,
       "articlesWithReads": 88
-    }
+    },
+    "verified": "经 sync_get 直连核对：与本文件数据逐字段一致"
   },
   "articles": [
     {
@@ -801,7 +802,7 @@
       "datetime": "2026-09-08T19:11",
       "original": 1,
       "aiUsage": 0,
-      "reads": 1
+      "reads": 4
     }
   ],
   "weeks": [
@@ -1493,6 +1494,29 @@
       "s5": 0,
       "s6": 0,
       "s7": 7,
+      "note": ""
+    },
+    {
+      "_ts": 1789376591638,
+      "_sortTs": 1788739200000,
+      "label": "2026年第37周",
+      "range": "9.07 – 9.13",
+      "wdate": "2026-09-07",
+      "reads": 98,
+      "shares": 0,
+      "fans": 179,
+      "newfans": 2,
+      "article": 0,
+      "imgtext": 0,
+      "video": 0,
+      "audio": 0,
+      "s1": 16.3,
+      "s2": 57.1,
+      "s3": 0,
+      "s4": 0,
+      "s5": 0,
+      "s6": 9.2,
+      "s7": 17.3,
       "note": ""
     }
   ],
