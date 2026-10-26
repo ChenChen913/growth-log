@@ -837,6 +837,18 @@ Store.onRefresh(function(payload) {
 });
 
 /* ========================================
+   公众号运营指导入口
+   Cloudflare Pages 会把 /guides.html 308 到 /guides；
+   GitHub Pages 没有无扩展名路由，只认 /guides.html。
+   先用 HEAD 探测无扩展名版本，再决定跳转目标。
+======================================== */
+function openGuides() {
+  fetch('./guides', { method: 'HEAD', cache: 'no-store' })
+    .then(res => { location.href = res.ok ? './guides' : './guides.html'; })
+    .catch(() => { location.href = './guides.html'; });
+}
+
+/* ========================================
    v3.3 · 云端数据说明弹窗
    v3.13 起后端为 Cloudflare Pages Functions + KV，
    不再需要单独的保活链接。

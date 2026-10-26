@@ -4,11 +4,12 @@
    · 静态资源：缓存优先，后台更新
    · 云端 API（/api/*）：永不缓存
    ═══════════════════════════════════════════════════════ */
-const CACHE = 'glog-v3.13.cfkv';
+const CACHE = 'glog-v3.13.1.guidefix';
 const CORE = [
   './',
   './index.html',
   './guides.html',
+  './guides',
   './css/style.css',
   './js/config.js',
   './js/store.js',
@@ -81,15 +82,45 @@ self.addEventListener('fetch', e => {
 
   /* 页面导航：网络优先；仅 200 刷新缓存，404/错误页回退缓存（防私有化后缓存被 404 页污染） */
   if (req.mode === 'navigate' || url.pathname.endsWith('.html') || url.pathname.endsWith('/')) {
+    const isIndexPage = url.pathname === '/' || url.pathname.endsWith('/index.html');
+    const cleanUrl = new URL(url);
+    if (url.pathname.endsWith('.html')) cleanUrl.pathname = url.pathname.replace(/\.html$/, '');
+
     e.respondWith(
       fetch(req)
-        .then(res => {
-          if (!res.ok) return caches.match('./index.html');
+        .then(async res => {
+          if (res.ok && res.redirected && url.pathname.endsWith('.html')) {
+            // Cloudflare Pages 会把 ./guides.html 308 到 ./guides。
+            return Response.redirect(cleanUrl.href, 302);
+          }
+          if (!res.ok) {
+            // 某些 CDN 对 .html 做重定向但 SW 的 navigate fetch 拿不到最终页：
+            // 再试一次无扩展名地址；成功则重定向，失败再回退缓存。
+            if (url.pathname.endsWith('.html')) {
+              try {
+                const cleanRes = await fetch(cleanUrl.href);
+                if (cleanRes.ok) return Response.redirect(cleanUrl.href, 302);
+              } catch (e) {}
+            }
+            return caches.match(req).then(hit => hit || caches.match('./index.html'));
+          }
           const copy = res.clone();
-          caches.open(CACHE).then(c => c.put('./index.html', copy));
+          if (isIndexPage) {
+            caches.open(CACHE).then(c => c.put('./index.html', copy));
+          } else {
+            caches.open(CACHE).then(c => c.put(req, copy));
+          }
           return res;
         })
-        .catch(() => caches.match('./index.html'))
+        .catch(async () => {
+          if (url.pathname.endsWith('.html')) {
+            try {
+              const cleanRes = await fetch(cleanUrl.href);
+              if (cleanRes.ok) return Response.redirect(cleanUrl.href, 302);
+            } catch (e) {}
+          }
+          return caches.match(req).then(hit => hit || caches.match('./index.html'));
+        })
     );
     return;
   }
