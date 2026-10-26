@@ -505,6 +505,7 @@ python3 /home/z/my-project/scripts/backup_push.py <备份.json> [更多.json]
 | v3.10+ | 93a0fbc/3c79843 | GitHub 备份通道 + backup_push.py | 幂等设计；敏感扫描固化 |
 | v3.10 | 83fc2fd | 断云自动兜底（四层保险闭环） | 场景化排查工作法 |
 | v3.11 | 79a27c7 | 手机端 header 溢出根治 | min-width 链路 + html/body 双层锁 |
+| v3.12 | 1a569f4 | 同步可靠性加固 + 文档对齐（自动重试 / 导入墓碑 / 口令成本） | 代码审查：降级状态无自动恢复路径；备份导入绕过墓碑 |
 
 ---
 
