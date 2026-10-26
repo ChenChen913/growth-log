@@ -1,0 +1,7 @@
+name = "growth-log-913"
+pages_build_output_dir = "."
+compatibility_date = "2026-10-26"
+
+[[kv_namespaces]]
+binding = "GL_DATA"
+id = "ba4c541f9bed407fbc09c54c21ddc33e"

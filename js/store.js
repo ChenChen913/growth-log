@@ -3,8 +3,9 @@
    ───────────────────────────────────────────────────────────────
    两种运行模式（由 config.js 自动决定）：
    · local 模式：数据存本设备 localStorage（glog_cache），无口令
-   · cloud 模式：数据存 Supabase（RPC: sync_get / sync_save），
-     打开网址需输入访问口令，手机 / 电脑 / 多浏览器实时同步
+   · cloud 模式：数据存 Cloudflare Pages Functions + Workers KV
+     （接口：/api/sync_get / /api/sync_save），打开网址需输入访问口令，
+     手机 / 电脑 / 多浏览器实时同步
 
    同步策略（单用户，按记录粒度合并）：
    · 每次改动先写本机缓存（dirty=true），1.6s 防抖后整包推送云端
@@ -19,7 +20,7 @@
     cache:    'glog_cache',      // { payload, dirty, savedAt }
   };
 
-  const mode = (cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY) ? 'cloud' : 'local';
+  const mode = cfg.DATA_API_URL ? 'cloud' : 'local';
   let currentPasscode = null;
   let pushTimer = null;
   let onReadyCb = null;
@@ -174,18 +175,14 @@
     };
   }
 
-  /* ─────────── Supabase RPC（纯 fetch，无 SDK 依赖）─────────── */
+  /* ─────────── Cloudflare API（纯 fetch，无 SDK 依赖）─────────── */
   async function rpc(fn, body) {
-    const url = cfg.SUPABASE_URL.replace(/\/+$/, '') + '/rest/v1/rpc/' + fn;
+    const url = cfg.DATA_API_URL.replace(/\/+$/, '') + '/' + fn;
     let res;
     try {
       res = await fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': cfg.SUPABASE_ANON_KEY,
-          'Authorization': 'Bearer ' + cfg.SUPABASE_ANON_KEY
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
     } catch (e) { const err = new Error('OFFLINE'); err.code = 'OFFLINE'; throw err; }
@@ -202,7 +199,7 @@
   const push = payload => rpc('sync_save', { p_code: savedCode(), p_payload: payload });
 
   /* ─────────── v3.10 · 备份自动兜底 ───────────
-     云端不可达（断网 / Supabase 故障或休眠）且本机无缓存时，
+     云端不可达（断网 / Cloudflare API 故障）且本机无缓存时，
      自动加载随站点部署的 GitHub 最新备份（./backups/latest-cloud.json），
      保证任何新设备打开网页，数据都能原原本本展示，不因云端故障而中断。
      注意：口令错误（ACCESS_DENIED）不会走到这里，访问控制不被绕过；
@@ -256,7 +253,7 @@
   }
 
   /* ─────────── v3.9 · 云端全量导出 ───────────
-     直连 Supabase 拉取权威整包（sync_get，只读不写入），
+     直连云 API 拉取权威整包（sync_get，只读不写入），
      经 normalize 字段级清洗后返回。
      与页面当前内存数据无关：即使本机缓存过期 / 有离线改动，
      导出的也是云端此刻的真实全量，适合随时随地做备份。 */
@@ -357,7 +354,7 @@
         currentPasscode = null;
         showGate(e.code === 'OFFLINE'
           ? '网络不可用，请检查网络后重试，或先离线浏览'
-          : '连接云端失败（' + (e.detail || '请检查 Supabase 配置') + '），可先离线浏览');
+          : '连接云端失败（' + (e.detail || '请检查 Cloudflare API 配置') + '），可先离线浏览');
         badge('err', '云端连接失败', '连接失败');
       }
       return false;

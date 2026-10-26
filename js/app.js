@@ -619,7 +619,7 @@ function exportData() {
   try { localStorage.setItem('glog_last_backup', String(Date.now())); } catch (e) {}
 }
 
-/* v3.9 · 云端全量导出：直连 Supabase 拉取权威整包（sync_get 只读），
+/* v3.9 · 云端全量导出：直连云端 API 拉取权威整包（sync_get 只读），
    与本机缓存 / 内存状态无关，随时随地一键拿到云端此刻的完整数据。
    导出结构与 exportData 完全一致（含 articles/weeks/avatar/tombstones），
    可直接用「导入历史数据」在任何设备上合并恢复。 */
@@ -663,26 +663,6 @@ async function exportCloudData(btn) {
     if (btn) { btn.disabled = false; btn.textContent = LABEL; }
     __cloudExportBusy = false;
   }
-}
-
-function exportDetailedData() {
-  const report = {
-    _meta: { exportedAt: new Date().toISOString(), reportType: 'detailed', version: '2.0' },
-    summary: {
-      总周数: weeks.length, 总文章数: articles.length,
-      已填阅读量: withReadsArticles().length + ' / ' + articles.length + ' 篇',
-      单篇最高: (function(){ const w = withReadsArticles(); if (!w.length) return '暂无'; let t = w[0]; w.forEach(a => { if (a.reads > t.reads) t = a; }); return t.title + '（' + t.reads + ' 阅读）'; })(),
-      单篇最低: (function(){ const w = withReadsArticles(); if (!w.length) return '暂无'; let l = w[0]; w.forEach(a => { if (a.reads < l.reads) l = a; }); return l.title + '（' + l.reads + ' 阅读）'; })()
-    },
-    articles: articles.map(a => ({
-      标题: a.title, 类型: TYPE_MAP[a.type] || a.type, 是否原创: a.original !== 0 ? '原创' : '转载',
-      AI辅助: AI_MAP[a.aiUsage || 0], 阅读量: a.reads == null ? '未填' : a.reads,
-      发布时间: a.datetime ? new Date(a.datetime).toLocaleString('zh-CN') : '未记录'
-    })),
-    weeks: weeks.map(w => ({ 周名称: w.label, 日期范围: w.range, 阅读量: w.reads, 新增粉丝: w.newfans }))
-  };
-  const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = '公众号成长日志_详细报告_' + new Date().toISOString().slice(0,10) + '.json'; a.click(); URL.revokeObjectURL(a.href);
 }
 
 function triggerImport() { document.getElementById('importFileInput').click(); }
@@ -857,37 +837,9 @@ Store.onRefresh(function(payload) {
 });
 
 /* ========================================
-   v3.3 · 云端数据说明弹窗 + 保活链接
-   保活链接在点击时用「当前已登录口令」动态拼装，
-   源码中不含任何口令，公开仓库零泄露。
+   v3.3 · 云端数据说明弹窗
+   v3.13 起后端为 Cloudflare Pages Functions + KV，
+   不再需要单独的保活链接。
 ======================================== */
 function openCloudInfo()  { document.getElementById('cloudInfoOverlay').classList.add('show'); }
 function closeCloudInfo() { document.getElementById('cloudInfoOverlay').classList.remove('show'); }
-
-function copyKeepalive() {
-  try {
-    const cfg  = window.APP_CONFIG || {};
-    const code = localStorage.getItem('glog_passcode') || '';
-    if (!cfg.SUPABASE_URL || !code) throw new Error('not-logged-in');
-    const url = cfg.SUPABASE_URL.replace(/\/+$/, '')
-      + '/rest/v1/rpc/sync_get?p_code=' + encodeURIComponent(code)
-      + '&apikey=' + encodeURIComponent(cfg.SUPABASE_ANON_KEY || '');
-    const done = () => Store.toast('保活链接已复制，建议存入收藏夹，每 1~2 周打开一次', 'ok');
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(url).then(done).catch(() => fallbackCopy(url, done));
-    } else fallbackCopy(url, done);
-  } catch (e) {
-    Store.toast('复制失败：请先登录云端模式', 'err');
-  }
-}
-
-function fallbackCopy(text, done) {
-  const ta = document.createElement('textarea');
-  ta.value = text;
-  ta.style.cssText = 'position:fixed;opacity:0;left:-999px;';
-  document.body.appendChild(ta);
-  ta.select();
-  try { document.execCommand('copy'); done(); }
-  catch (e) { Store.toast('复制失败，请手动复制', 'err'); }
-  ta.remove();
-}

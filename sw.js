@@ -2,9 +2,9 @@
    公众号成长日志 · Service Worker
    · 页面导航：网络优先，断网回退缓存
    · 静态资源：缓存优先，后台更新
-   · Supabase 云端 API：永不缓存
+   · 云端 API（/api/*）：永不缓存
    ═══════════════════════════════════════════════════════ */
-const CACHE = 'glog-v3.12.syncfix';
+const CACHE = 'glog-v3.13.cfkv';
 const CORE = [
   './',
   './index.html',

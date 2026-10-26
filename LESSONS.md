@@ -1,8 +1,10 @@
 # LESSONS · 开发踩坑手册与协作经验（内部文档）
 
 > 这份文档不是产品说明书。README 讲「怎么用」，这份讲「我们踩过什么坑、为什么这么设计、下次怎么避」。
-> 它是项目从 v1 单文件演进到 v3.12 的全部实战经验沉淀，写给未来的维护者（包括人类和 AI 助手）。
-> **安全约定：本文件不含访问口令、GitHub token、Supabase 密钥。涉及凭据处一律以「见 config.js」「用户私有」代替。**
+> 它是项目从 v1 单文件演进到 v3.13 的全部实战经验沉淀，写给未来的维护者（包括人类和 AI 助手）。
+> **安全约定：本文件不含访问口令、GitHub token、云端密钥。涉及凭据处一律以「见 config.js」「用户私有」代替。**
+>
+> ⚠️ v3.13（2026-10-26）起后端已从 Supabase 迁到 **Cloudflare Pages Functions + Workers KV**。本文中 Supabase 相关章节是历史经验（E 章、旧版部署细节），保留供回溯；当前实现以 README / DATA / DEPLOY / functions 为准。
 
 ---
 
@@ -30,15 +32,15 @@
 
 ### 1.1 技术形态
 
-纯静态 SPA（无框架、无构建步骤）：`index.html + css/style.css + js/*.js`，部署在 GitHub Pages。数据双模式：
+纯静态 SPA（无框架、无构建步骤）：`index.html + css/style.css + js/*.js`，前端部署在 Cloudflare Pages（GitHub Pages 可作镜像）。数据双模式：
 
 - **本地模式**：数据存 localStorage（`glog_cache`），开箱即用
-- **云端模式**：Supabase 两个 RPC（`sync_get` / `sync_save`）+ bcrypt 口令校验 + RLS 锁表；整包读写、按 `_ts` 时间戳合并、墓碑（tombstones）防删除记录复活
+- **云端模式**：Cloudflare Pages Functions 两个接口（`/api/sync_get` / `/api/sync_save`）+ Workers KV + SHA-256 口令哈希；整包读写、按 `_ts` 时间戳合并、墓碑（tombstones）防删除记录复活
 
 ### 1.2 数据流向（云端模式）
 
 ```
-UI 操作 → 内存 state → localStorage(glog_cache, 含 dirty 标记) → 防抖推送 → Supabase 整包
+UI 操作 → 内存 state → localStorage(glog_cache, 含 dirty 标记) → 防抖推送 → Cloudflare KV 整包
                                                         ↘ 断网时暂存，online/visibilitychange 自动补传
 启动时：localStorage 缓存优先秒显 → 云端 pull → 内容指纹(renderedKey)比对 → 有变化才重绘
 云端不可达兜底：fetch('./backups/latest-cloud.json')（GitHub 内置备份）→ 只读展示
@@ -50,7 +52,7 @@ UI 操作 → 内存 state → localStorage(glog_cache, 含 dirty 标记) → �
 | 层级 | 载体 | 恢复速度 | 说明 |
 |------|------|---------|------|
 | 1 | 本机 localStorage 缓存 | 即时 | 断网可离线浏览，恢复后自动补传 |
-| 2 | Supabase 云端权威数据 | 秒级 | 换设备输口令即拉全量 |
+| 2 | Cloudflare KV 云端权威数据 | 秒级 | 换设备输口令即拉全量 |
 | 3 | GitHub 内置备份 `backups/latest-cloud.json` | 自动 | 随 Pages 部署，断云+新设备时自动兜底展示 |
 | 4 | 用户手动导出的 JSON 文件 | 手动导入 | 终极保险，跨设备合并恢复 |
 
@@ -58,12 +60,14 @@ UI 操作 → 内存 state → localStorage(glog_cache, 含 dirty 标记) → �
 
 | 文件 | 职责 | 改动注意 |
 |------|------|---------|
-| `js/config.js` | 唯一配置文件（Supabase URL + key） | SW 对它**网络优先**，改它不用 bump 缓存版本 |
+| `js/config.js` | 唯一配置文件（Cloudflare API 地址） | SW 对它**网络优先**，改它不用 bump 缓存版本 |
 | `js/store.js` | 数据层：双模式、清洗白名单、合并、墓碑、兜底、降级自动重试 | 涉及数据结构，改动必须全链路回归 |
 | `js/app.js` | UI 层：渲染、CRUD、弹窗、导出 | 渲染拼接必须走 `esc()` |
 | `sw.js` | 缓存策略核心 | 改任何应用文件都要 bump 第一屏的 `CACHE` |
-| `backups/latest-cloud.json` | 内置备份兜底数据 | 由 `scripts/backup_push.py` 自动同步更新 |
-| `sql/setup.sql` | Supabase 一次性建库脚本 | 含 bcrypt 哈希，属敏感操作文件 |
+| `functions/api/` | Cloudflare Pages Functions 接口 | 涉及口令/数据结构时必须回归 |
+| `wrangler.toml` | Pages Functions 的 KV 绑定配置 | 换 KV namespace 时同步修改 |
+| `backups/latest-cloud.json` | 内置备份兜底数据 | 由备份流程更新 |
+| `sql/setup.sql` | 旧 Supabase 脚本（已废弃） | 仅历史参考，不再执行 |
 | `scripts/package_v35.py` | 部署包打包 + 断言 | 每个版本必须升级断言点 |
 
 ---
@@ -74,9 +78,9 @@ UI 操作 → 内存 state → localStorage(glog_cache, 含 dirty 标记) → �
 
 ### 铁律 1：改任何应用代码，必须 bump sw.js 的 CACHE 常量
 
-`sw.js` 第一屏 `const CACHE = 'glog-v3.12.syncfix'`。静态资源走**缓存优先**策略——不改这个字符串，老设备永远拿不到新代码，且你自己本地测试都会被旧缓存骗（详见坑 A-1）。
+`sw.js` 第一屏 `const CACHE = 'glog-v3.13.cfkv'`。静态资源走**缓存优先**策略——不改这个字符串，老设备永远拿不到新代码，且你自己本地测试都会被旧缓存骗（详见坑 A-1）。
 
-命名惯例：`glog-v{主版本}.{语义短名}`，如 `v3.8.insights`、`v3.9.cloudexport`、`v3.10.bkfall`、`v3.11.flexfix`、`v3.12.syncfix`。一个功能一个名字，方便在 DevTools Application 面板里一眼认出线上跑的是哪个版本。
+命名惯例：`glog-v{主版本}.{语义短名}`，如 `v3.8.insights`、`v3.9.cloudexport`、`v3.10.bkfall`、`v3.11.flexfix`、`v3.12.syncfix`、`v3.13.cfkv`。一个功能一个名字，方便在 DevTools Application 面板里一眼认出线上跑的是哪个版本。
 
 **例外**（不用 bump）：只改 `config.js`（SW 对它网络优先）、只改 `.md` 文档（不在 CORE 清单，不影响应用）。
 
