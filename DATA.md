@@ -53,7 +53,7 @@
 | 导出入口 | 数据总览 → 数据管理 →「导出数据（JSON 备份）」或「导出云端全量数据」 |
 | 格式 | 包含 articles / weeks / avatar / tombstones；均可通过「导入历史数据」合并恢复 |
 | 建议频率 | 每季度一次；批量录入后加做一次 |
-| 存放 | 电脑本地 + 网盘各一份 |
+| 存放 | 电脑本地 + 网盘各一份；GitHub Actions 每天自动同步一份到 `backups/latest-cloud.json` |
 
 > ⚠️ 内置备份 `backups/latest-cloud.json` 随站点公开部署，仓库公开时其中的文章标题 / 阅读量 / 周报备注也可被直接下载；口令只保护 KV 实时数据。
 

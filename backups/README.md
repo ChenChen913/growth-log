@@ -17,7 +17,7 @@
 | `HISTORY.md` | 每次备份的索引（日期 / 计数） |
 
 - 同一天多次导出会覆盖同名日期文件，旧版本仍保留在 git 历史中，可随时回溯。
-- 想要最新全量数据：直接下载 `latest-cloud.json` 即可。
+- 想要最新全量数据：直接下载 `latest-cloud.json` 即可。\n- `latest-cloud.json` 也会由 GitHub Actions 每天自动从 Cloudflare KV 同步（见 `.github/workflows/cloudflare-backup.yml`）；Cloudflare 不可达时保留旧快照。
 - 2026-10-26 的 `latest-cloud.json` 是**恢复合并快照**：旧云端项目当时不可达，由 `local_2026-10-26.json` 与 `cloud_2026-09-14.json` 合并生成，保留旧阅读量 / AI 标记 / 墓碑，并加入 2 篇新文章、2 条周报。后端迁移到 Cloudflare KV 后，应以 KV 实时数据为准。
 
 ## 安全性

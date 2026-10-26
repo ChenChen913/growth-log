@@ -53,7 +53,15 @@
 
 **一句话原则**：徽标正常就不用管后端；异常超过 1 小时再看 Cloudflare 状态页。
 
-## 三、常见问题速查
+## 三、GitHub Pages 备用站
+
+- 备用站地址：https://chenchen913.github.io/growth-log/
+- 它和 Cloudflare 主站共用同一个 Cloudflare API；Cloudflare API 正常时可以完整读写
+- Cloudflare 故障时：备用站能打开，读本地缓存 / 最近一次自动快照；写入先留在浏览器本地，恢复后再同步
+- 自动快照：GitHub Actions 每天 UTC 02:17（北京时间 10:17）从 Cloudflare KV 拉取数据，更新 `backups/latest-cloud.json`；可在 Actions → 「Cloudflare 数据快照」手动运行
+- 自动快照失败（例如 Cloudflare 不可达）时不会覆盖旧快照，旧快照继续可用
+
+## 四、常见问题速查
 
 | 现象 | 原因 | 处理 |
 |------|------|------|

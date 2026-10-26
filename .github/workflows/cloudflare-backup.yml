@@ -1,0 +1,83 @@
+name: Cloudflare 数据快照
+
+on:
+  schedule:
+    # 每天 UTC 02:17（北京时间 10:17）自动拉一次云端数据
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cloudflare-backup
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch latest Cloudflare KV snapshot
+        env:
+          GLOG_API: https://growth-log-913.pages.dev/api
+          GLOG_PASSCODE: ${{ secrets.GLOG_PASSCODE }}
+        run: |
+          python3 - <<'PY'
+          import json, os, sys, urllib.request
+
+          api = os.environ["GLOG_API"].rstrip("/") + "/sync_get"
+          body = json.dumps({"p_code": os.environ["GLOG_PASSCODE"]}).encode("utf-8")
+          req = urllib.request.Request(
+              api,
+              data=body,
+              headers={"Content-Type": "application/json"},
+              method="POST",
+          )
+          try:
+              with urllib.request.urlopen(req, timeout=45) as resp:
+                  payload = json.load(resp)
+          except Exception as exc:
+              print(f"fetch failed: {exc}", file=sys.stderr)
+              sys.exit(1)
+
+          articles = payload.get("articles")
+          weeks = payload.get("weeks")
+          if not isinstance(articles, list) or not isinstance(weeks, list):
+              print("unexpected payload shape", file=sys.stderr)
+              sys.exit(1)
+          if len(articles) == 0 and len(weeks) == 0:
+              print("refusing to overwrite snapshot with empty data", file=sys.stderr)
+              sys.exit(1)
+
+          path = "backups/latest-cloud.json"
+          try:
+              with open(path, "r", encoding="utf-8") as fh:
+                  current = json.load(fh)
+          except Exception:
+              current = None
+
+          print(f"cloud data: {len(articles)} articles / {len(weeks)} weeks")
+          if current == payload:
+              print("snapshot unchanged")
+              sys.exit(0)
+
+          with open(path, "w", encoding="utf-8") as fh:
+              json.dump(payload, fh, ensure_ascii=False, indent=2)
+              fh.write("\n")
+          print(f"snapshot updated: {path}")
+          PY
+
+      - name: Commit snapshot if changed
+        run: |
+          if git diff --quiet -- backups/latest-cloud.json; then
+            echo "no diff, nothing to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add backups/latest-cloud.json
+          git commit -m "backup: sync Cloudflare KV snapshot"
+          git push

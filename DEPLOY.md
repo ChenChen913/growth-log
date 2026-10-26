@@ -47,6 +47,16 @@ python -m http.server 8080
 
 GitHub Pages 只托管静态前端，数据 API 仍指向 Cloudflare；两处使用同一份 `js/config.js`。更新 GitHub 后 Pages 自动构建；Cloudflare 侧需单独重新 deploy。
 
+## 自动快照（GitHub Actions）
+
+仓库已包含 `.github/workflows/cloudflare-backup.yml`：
+
+- 每天 UTC 02:17 自动从 Cloudflare API 拉取 `payload`，写入 `backups/latest-cloud.json`；
+- 只有数据变化才 commit；
+- 也可在 GitHub 仓库 → Actions → 「Cloudflare 数据快照」→ Run workflow 手动执行。
+
+需要的 GitHub Secret：`GLOG_PASSCODE`（访问口令）。它只用于该定时任务，不会出现在代码/日志中。Cloudflare 不可达时任务会失败并保留旧快照，不会把备份写空。
+
 ## 数据迁移
 
 从旧 Supabase 环境迁移：先在旧站导出云端全量数据（或使用 `backups/latest-cloud.json`），再到新站「导入历史数据」；导入会按墓碑过滤。`sql/setup.sql` 已废弃，仅历史参考。

@@ -51,6 +51,14 @@ README / DEPLOY / OPS / DATA / LESSONS  五份文档
 - 随时可用「导出数据（JSON 备份）」下载全部数据；导入时做字段级清洗
 - ⚠️ 为支持断云兜底，`backups/latest-cloud.json` 会随站点公开部署；仓库公开时，快照中的文章标题 / 阅读量 / 周报备注也可被直接下载。敏感数据请使用私有仓库，或移除内置备份
 
+## 备用站与每日备份
+
+- **主站**：Cloudflare Pages（数据在 Cloudflare KV）
+- **备用站**：GitHub Pages（同一份前端 + 同一 Cloudflare API）
+- 每天由 GitHub Actions 自动从 Cloudflare KV 拉取快照，更新 `backups/latest-cloud.json`；也可以手动到 GitHub Actions 里运行「Cloudflare 数据快照」
+- Cloudflare 故障时：打开备用站，能看本地缓存 / 最近快照；新改动先存本地，Cloudflare 恢复后再同步
+- 自动快照工作流：`.github/workflows/cloudflare-backup.yml`
+
 ## 部署更新
 
 ```bash
