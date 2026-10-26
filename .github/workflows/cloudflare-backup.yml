@@ -33,7 +33,13 @@ jobs:
           req = urllib.request.Request(
               api,
               data=body,
-              headers={"Content-Type": "application/json"},
+              headers={
+                  "Content-Type": "application/json",
+                  # Cloudflare 会拦截 Python-urllib 的默认 User-Agent（403），
+                  # 用一个明确的客户端标识即可正常访问。
+                  "User-Agent": "growth-log-backup/1.0",
+                  "Accept": "application/json",
+              },
               method="POST",
           )
           try:
