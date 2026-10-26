@@ -1,81 +1,64 @@
 {
   "_meta": {
-    "exportedAt": "2026-09-14T09:03:43.352Z",
+    "exportedAt": "2026-10-26T10:23:16.879Z",
     "appName": "公众号成长日志",
-    "version": "3.0"
+    "version": "2.0"
   },
   "articles": [
     {
       "_ts": 1771896748796,
       "title": "我好像知道什么是『世界知识』了",
       "type": "imgtext",
-      "datetime": "2025-12-06T15:51",
-      "original": 1,
-      "aiUsage": 0,
-      "reads": 36
+      "datetime": "2025-12-06T15:51"
     },
     {
       "_ts": 1771897357170,
       "title": "人人都能当产品经理吗？",
       "type": "article",
       "datetime": "2025-12-08T20:04",
-      "original": 1,
-      "aiUsage": 0,
-      "reads": 51
+      "original": 1
     },
     {
       "_ts": 1771897393488,
       "title": "AI资源分享 1.0",
       "type": "article",
       "datetime": "2025-12-10T14:52",
-      "original": 1,
-      "aiUsage": 0,
-      "reads": 374
+      "original": 1
     },
     {
       "_ts": 1771897432429,
       "title": "做几张喜庆图片",
       "type": "imgtext",
       "datetime": "2025-12-25T20:34",
-      "original": 1,
-      "aiUsage": 0,
-      "reads": 111
+      "original": 1
     },
     {
       "_ts": 1771897472938,
       "title": "2025年度回顾！",
       "type": "article",
       "datetime": "2025-12-31T22:55",
-      "original": 1,
-      "aiUsage": 0,
-      "reads": 14
+      "original": 1
     },
     {
       "_ts": 1771897500529,
       "title": "ClaudeCode 之父的 13 条编程心法（上）- 详细操作版",
       "type": "article",
       "datetime": "2026-01-09T20:48",
-      "original": 1,
-      "aiUsage": 0,
-      "reads": 19
+      "original": 1
     },
     {
       "_ts": 1771897528899,
       "title": "ClaudeCode 之父的 13 条编程心法（下）",
       "type": "article",
       "datetime": "2026-01-13T14:34",
-      "original": 1,
-      "aiUsage": 0,
-      "reads": 29
+      "original": 1
     },
     {
       "_ts": 1771897558799,
       "title": "AI 时代焦虑：如何理性看待 AI 的进步与局限？",
       "type": "article",
       "datetime": "2026-01-14T08:40",
-      "original": 1,
-      "aiUsage": 0,
-      "reads": 54
+      "original": 1
     },
     {
       "_ts": 1771897601640,
@@ -83,8 +66,7 @@
       "type": "imgtext",
       "datetime": "2026-01-15T01:00",
       "original": 1,
-      "aiUsage": 1,
-      "reads": 162
+      "aiUsage": 1
     },
     {
       "_ts": 1771897638992,
@@ -92,17 +74,14 @@
       "type": "article",
       "datetime": "2026-01-16T01:00",
       "original": 1,
-      "aiUsage": 2,
-      "reads": 96
+      "aiUsage": 2
     },
     {
       "_ts": 1771897670562,
       "title": "显然，Gemini3 < ( ClaudeCode + Skills )",
       "type": "imgtext",
       "datetime": "2026-01-16T19:46",
-      "original": 1,
-      "aiUsage": 0,
-      "reads": 1008
+      "original": 1
     },
     {
       "_ts": 1771897699144,
@@ -110,8 +89,7 @@
       "type": "article",
       "datetime": "2026-01-17T01:00",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 207
+      "aiUsage": 0
     },
     {
       "_ts": 1771897735484,
@@ -119,17 +97,14 @@
       "type": "article",
       "datetime": "2026-01-17T18:14",
       "original": 1,
-      "aiUsage": 1,
-      "reads": 77
+      "aiUsage": 1
     },
     {
       "_ts": 1771897774913,
       "title": "想念青岛的一天",
       "type": "imgtext",
       "datetime": "2026-01-18T21:31",
-      "original": 1,
-      "aiUsage": 0,
-      "reads": 77
+      "original": 1
     },
     {
       "_ts": 1771897808343,
@@ -137,8 +112,7 @@
       "type": "imgtext",
       "datetime": "2026-01-24T14:56",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 1165
+      "aiUsage": 0
     },
     {
       "_ts": 1771897839811,
@@ -146,17 +120,14 @@
       "type": "article",
       "datetime": "2026-01-26T01:04",
       "original": 1,
-      "aiUsage": 2,
-      "reads": 35
+      "aiUsage": 2
     },
     {
       "_ts": 1771897872327,
       "title": "我对AI的态度！",
       "type": "imgtext",
       "datetime": "2026-01-26T15:50",
-      "original": 1,
-      "aiUsage": 0,
-      "reads": 101
+      "original": 1
     },
     {
       "_ts": 1771897895899,
@@ -164,8 +135,7 @@
       "type": "imgtext",
       "datetime": "2026-02-01T14:01",
       "original": 1,
-      "aiUsage": 1,
-      "reads": 23
+      "aiUsage": 1
     },
     {
       "_ts": 1771897925214,
@@ -173,8 +143,7 @@
       "type": "article",
       "datetime": "2026-02-02T00:33",
       "original": 1,
-      "aiUsage": 2,
-      "reads": 41
+      "aiUsage": 2
     },
     {
       "_ts": 1771897955377,
@@ -182,8 +151,7 @@
       "type": "article",
       "datetime": "2026-02-02T17:25",
       "original": 1,
-      "aiUsage": 2,
-      "reads": 31
+      "aiUsage": 2
     },
     {
       "_ts": 1771897992249,
@@ -191,17 +159,14 @@
       "type": "imgtext",
       "datetime": "2026-02-03T00:01",
       "original": 1,
-      "aiUsage": 1,
-      "reads": 17
+      "aiUsage": 1
     },
     {
       "_ts": 1771898019899,
       "title": "AI 时代的执行力",
       "type": "imgtext",
       "datetime": "2026-02-04T13:41",
-      "original": 1,
-      "aiUsage": 0,
-      "reads": 67
+      "original": 1
     },
     {
       "_ts": 1771898063266,
@@ -209,8 +174,7 @@
       "type": "article",
       "datetime": "2026-02-05T00:24",
       "original": 1,
-      "aiUsage": 2,
-      "reads": 65
+      "aiUsage": 2
     },
     {
       "_ts": 1771898088704,
@@ -218,8 +182,7 @@
       "type": "article",
       "datetime": "2026-02-11T07:00",
       "original": 1,
-      "aiUsage": 2,
-      "reads": 175
+      "aiUsage": 2
     },
     {
       "_ts": 1771898117935,
@@ -227,8 +190,7 @@
       "type": "article",
       "datetime": "2026-02-11T23:38",
       "original": 1,
-      "aiUsage": 2,
-      "reads": 225
+      "aiUsage": 2
     },
     {
       "_ts": 1771898145385,
@@ -236,8 +198,7 @@
       "type": "article",
       "datetime": "2026-02-12T13:15",
       "original": 1,
-      "aiUsage": 1,
-      "reads": 105
+      "aiUsage": 1
     },
     {
       "_ts": 1771898181409,
@@ -245,8 +206,7 @@
       "type": "article",
       "datetime": "2026-02-13T21:35",
       "original": 1,
-      "aiUsage": 2,
-      "reads": 174
+      "aiUsage": 2
     },
     {
       "_ts": 1771898209495,
@@ -254,8 +214,7 @@
       "type": "article",
       "datetime": "2026-02-18T21:39",
       "original": 1,
-      "aiUsage": 2,
-      "reads": 369
+      "aiUsage": 2
     },
     {
       "_ts": 1771898234551,
@@ -263,8 +222,7 @@
       "type": "article",
       "datetime": "2026-02-19T07:01",
       "original": 1,
-      "aiUsage": 2,
-      "reads": 301
+      "aiUsage": 2
     },
     {
       "_ts": 1771898261354,
@@ -272,8 +230,7 @@
       "type": "article",
       "datetime": "2026-02-21T22:28",
       "original": 1,
-      "aiUsage": 2,
-      "reads": 75
+      "aiUsage": 2
     },
     {
       "_ts": 1771898284926,
@@ -281,8 +238,7 @@
       "type": "article",
       "datetime": "2026-02-22T12:42",
       "original": 1,
-      "aiUsage": 2,
-      "reads": 55
+      "aiUsage": 2
     },
     {
       "_ts": 1771898329701,
@@ -290,8 +246,7 @@
       "type": "audio",
       "datetime": "2026-02-23T21:07",
       "original": 1,
-      "aiUsage": 1,
-      "reads": 5
+      "aiUsage": 1
     },
     {
       "_ts": 1771934854255,
@@ -299,8 +254,7 @@
       "type": "article",
       "datetime": "2026-02-24T20:07",
       "original": 1,
-      "aiUsage": 2,
-      "reads": 18
+      "aiUsage": 2
     },
     {
       "_ts": 1771942814573,
@@ -308,17 +262,14 @@
       "type": "article",
       "datetime": "2026-02-25T07:00",
       "original": 1,
-      "aiUsage": 1,
-      "reads": 120
+      "aiUsage": 1
     },
     {
       "_ts": 1771985116466,
       "title": "AI时代最夯搭配",
       "type": "imgtext",
       "datetime": "2026-02-25T10:05",
-      "original": 1,
-      "aiUsage": 0,
-      "reads": 116
+      "original": 1
     },
     {
       "_ts": 1772245000192,
@@ -326,8 +277,7 @@
       "type": "imgtext",
       "datetime": "2026-02-28T10:15",
       "original": 1,
-      "aiUsage": 2,
-      "reads": 137
+      "aiUsage": 2
     },
     {
       "_ts": 1772369462380,
@@ -335,17 +285,14 @@
       "type": "article",
       "datetime": "2026-03-01T20:50",
       "original": 1,
-      "aiUsage": 2,
-      "reads": 103
+      "aiUsage": 2
     },
     {
       "_ts": 1772553363222,
       "title": "安装了OpenClaw之后，我感觉：龙虾就是龙虾，叫他贾维斯还是太早！",
       "type": "imgtext",
       "datetime": "2026-03-03T23:55",
-      "original": 1,
-      "aiUsage": 0,
-      "reads": 16
+      "original": 1
     },
     {
       "_ts": 1772553397958,
@@ -353,17 +300,14 @@
       "type": "imgtext",
       "datetime": "2026-03-03T23:56",
       "original": 1,
-      "aiUsage": 2,
-      "reads": 14
+      "aiUsage": 2
     },
     {
       "_ts": 1772903926001,
       "title": "用skill做视频，真没你想的那么美",
       "type": "article",
       "datetime": "2026-03-08T01:18",
-      "original": 1,
-      "aiUsage": 0,
-      "reads": 25
+      "original": 1
     },
     {
       "_ts": 1773133092633,
@@ -371,26 +315,21 @@
       "type": "article",
       "datetime": "2026-03-10T16:58",
       "original": 1,
-      "aiUsage": 2,
-      "reads": 9
+      "aiUsage": 2
     },
     {
       "_ts": 1773147305081,
       "title": "《人与龙虾》",
       "type": "imgtext",
       "datetime": "2026-03-10T20:54",
-      "original": 1,
-      "aiUsage": 0,
-      "reads": 7
+      "original": 1
     },
     {
       "_ts": 1773147325089,
       "title": "龙虾养殖攻略，就这三点！",
       "type": "imgtext",
       "datetime": "2026-03-10T20:55",
-      "original": 1,
-      "aiUsage": 0,
-      "reads": 12
+      "original": 1
     },
     {
       "_ts": 1773222369160,
@@ -398,8 +337,7 @@
       "type": "article",
       "datetime": "2026-03-11T17:46",
       "original": 1,
-      "aiUsage": 2,
-      "reads": 24
+      "aiUsage": 2
     },
     {
       "_ts": 1773306476742,
@@ -407,8 +345,7 @@
       "type": "article",
       "datetime": "2026-03-12T17:07",
       "original": 1,
-      "aiUsage": 2,
-      "reads": 65
+      "aiUsage": 2
     },
     {
       "_ts": 1773466367272,
@@ -416,8 +353,7 @@
       "type": "article",
       "datetime": "2026-03-14T13:32",
       "original": 1,
-      "aiUsage": 2,
-      "reads": 82
+      "aiUsage": 2
     },
     {
       "_ts": 1773654556385,
@@ -425,8 +361,7 @@
       "type": "article",
       "datetime": "2026-03-16T17:49",
       "original": 1,
-      "aiUsage": 2,
-      "reads": 18
+      "aiUsage": 2
     },
     {
       "_ts": 1773669195836,
@@ -434,8 +369,7 @@
       "type": "article",
       "datetime": "2026-03-16T21:53",
       "original": 1,
-      "aiUsage": 2,
-      "reads": 67
+      "aiUsage": 2
     },
     {
       "_ts": 1773766694789,
@@ -443,8 +377,7 @@
       "type": "article",
       "datetime": "2026-03-18T00:58",
       "original": 1,
-      "aiUsage": 2,
-      "reads": 26
+      "aiUsage": 2
     },
     {
       "_ts": 1773984231811,
@@ -452,8 +385,7 @@
       "type": "article",
       "datetime": "2026-03-20T13:23",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 30
+      "aiUsage": 0
     },
     {
       "_ts": 1775375986049,
@@ -461,8 +393,7 @@
       "type": "article",
       "datetime": "2026-04-05T15:59",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 23
+      "aiUsage": 0
     },
     {
       "_ts": 1775456205168,
@@ -470,8 +401,7 @@
       "type": "imgtext",
       "datetime": "2026-04-06T14:16",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 31
+      "aiUsage": 0
     },
     {
       "_ts": 1775757714193,
@@ -479,8 +409,7 @@
       "type": "article",
       "datetime": "2026-04-10T02:00",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 20
+      "aiUsage": 0
     },
     {
       "_ts": 1775874977003,
@@ -488,8 +417,7 @@
       "type": "article",
       "datetime": "2026-04-11T10:36",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 333
+      "aiUsage": 0
     },
     {
       "_ts": 1775889915055,
@@ -497,8 +425,7 @@
       "type": "article",
       "datetime": "2026-04-11T14:45",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 10
+      "aiUsage": 0
     },
     {
       "_ts": 1776250765017,
@@ -506,8 +433,7 @@
       "type": "article",
       "datetime": "2026-04-15T18:59",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 60
+      "aiUsage": 0
     },
     {
       "_ts": 1777056053274,
@@ -515,8 +441,7 @@
       "type": "article",
       "datetime": "2026-04-25T02:40",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 112
+      "aiUsage": 0
     },
     {
       "_ts": 1777106915081,
@@ -524,8 +449,7 @@
       "type": "imgtext",
       "datetime": "2026-04-25T16:48",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 29
+      "aiUsage": 0
     },
     {
       "_ts": 1777192463844,
@@ -533,8 +457,7 @@
       "type": "imgtext",
       "datetime": "2026-04-26T16:34",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 10
+      "aiUsage": 0
     },
     {
       "_ts": 1777468272540,
@@ -542,8 +465,7 @@
       "type": "article",
       "datetime": "2026-04-29T21:11",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 42
+      "aiUsage": 0
     },
     {
       "_ts": 1777903587042,
@@ -551,8 +473,7 @@
       "type": "imgtext",
       "datetime": "2026-05-04T22:06",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 117
+      "aiUsage": 0
     },
     {
       "_ts": 1778217843229,
@@ -560,8 +481,7 @@
       "type": "article",
       "datetime": "2026-05-08T13:23",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 237
+      "aiUsage": 0
     },
     {
       "_ts": 1778336752646,
@@ -569,8 +489,7 @@
       "type": "imgtext",
       "datetime": "2026-05-09T22:25",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 57
+      "aiUsage": 0
     },
     {
       "_ts": 1778377200617,
@@ -578,8 +497,7 @@
       "type": "imgtext",
       "datetime": "2026-05-10T09:39",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 53
+      "aiUsage": 0
     },
     {
       "_ts": 1778416724709,
@@ -587,8 +505,7 @@
       "type": "imgtext",
       "datetime": "2026-05-10T20:38",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 44
+      "aiUsage": 0
     },
     {
       "_ts": 1778514958240,
@@ -596,8 +513,7 @@
       "type": "article",
       "datetime": "2026-05-11T23:55",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 69
+      "aiUsage": 0
     },
     {
       "_ts": 1778866663197,
@@ -605,8 +521,7 @@
       "type": "article",
       "datetime": "2026-05-16T01:37",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 226
+      "aiUsage": 0
     },
     {
       "_ts": 1778942100047,
@@ -614,8 +529,7 @@
       "type": "article",
       "datetime": "2026-05-16T22:34",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 20
+      "aiUsage": 0
     },
     {
       "_ts": 1779185142425,
@@ -623,8 +537,7 @@
       "type": "article",
       "datetime": "2026-05-19T18:05",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 284
+      "aiUsage": 0
     },
     {
       "_ts": 1779248103746,
@@ -632,8 +545,7 @@
       "type": "imgtext",
       "datetime": "2026-05-20T11:34",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 194
+      "aiUsage": 0
     },
     {
       "_ts": 1779320438779,
@@ -641,8 +553,7 @@
       "type": "imgtext",
       "datetime": "2026-05-21T07:40",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 55
+      "aiUsage": 0
     },
     {
       "_ts": 1779728049241,
@@ -650,8 +561,7 @@
       "type": "imgtext",
       "datetime": "2026-05-26T00:53",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 92
+      "aiUsage": 0
     },
     {
       "_ts": 1779796015388,
@@ -659,8 +569,7 @@
       "type": "article",
       "datetime": "2026-05-26T19:46",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 517
+      "aiUsage": 0
     },
     {
       "_ts": 1779872488194,
@@ -668,8 +577,7 @@
       "type": "imgtext",
       "datetime": "2026-05-27T17:00",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 52
+      "aiUsage": 0
     },
     {
       "_ts": 1780503311913,
@@ -677,8 +585,7 @@
       "type": "article",
       "datetime": "2026-06-04T00:15",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 18
+      "aiUsage": 0
     },
     {
       "_ts": 1780536341134,
@@ -686,8 +593,7 @@
       "type": "imgtext",
       "datetime": "2026-06-04T09:25",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 112
+      "aiUsage": 0
     },
     {
       "_ts": 1780546326877,
@@ -695,8 +601,7 @@
       "type": "imgtext",
       "datetime": "2026-06-04T12:12",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 61
+      "aiUsage": 0
     },
     {
       "_ts": 1781082663009,
@@ -704,8 +609,7 @@
       "type": "imgtext",
       "datetime": "2026-06-10T17:10",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 100
+      "aiUsage": 0
     },
     {
       "_ts": 1781141536929,
@@ -713,8 +617,7 @@
       "type": "imgtext",
       "datetime": "2026-06-11T09:32",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 115
+      "aiUsage": 0
     },
     {
       "_ts": 1784984661874,
@@ -722,8 +625,7 @@
       "type": "imgtext",
       "datetime": "2026-07-25T21:04",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 102
+      "aiUsage": 0
     },
     {
       "_ts": 1785056960924,
@@ -731,8 +633,7 @@
       "type": "imgtext",
       "datetime": "2026-07-26T17:09",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 74
+      "aiUsage": 0
     },
     {
       "_ts": 1785168853167,
@@ -740,8 +641,7 @@
       "type": "imgtext",
       "datetime": "2026-07-28T00:14",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 46
+      "aiUsage": 0
     },
     {
       "_ts": 1785927129879,
@@ -749,8 +649,7 @@
       "type": "imgtext",
       "datetime": "2026-08-05T18:51",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 48
+      "aiUsage": 0
     },
     {
       "_ts": 1785983278355,
@@ -758,8 +657,7 @@
       "type": "imgtext",
       "datetime": "2026-08-06T10:27",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 48
+      "aiUsage": 0
     },
     {
       "_ts": 1786910772256,
@@ -767,8 +665,7 @@
       "type": "article",
       "datetime": "2026-08-17T04:05",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 50
+      "aiUsage": 0
     },
     {
       "_ts": 1788442678948,
@@ -776,8 +673,7 @@
       "type": "imgtext",
       "datetime": "2026-09-03T21:37",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 14
+      "aiUsage": 0
     },
     {
       "_ts": 1788678698797,
@@ -785,17 +681,23 @@
       "type": "article",
       "datetime": "2026-09-06T15:11",
       "original": 1,
-      "aiUsage": 2,
-      "reads": 105
+      "aiUsage": 2
     },
     {
-      "_ts": 1788865893637,
-      "title": "李沐老师小红书评论区精选问题",
+      "_ts": 1790947228422,
+      "title": "对于AI输出结果的形式，卡帕西给出4种方案",
       "type": "imgtext",
-      "datetime": "2026-09-08T19:11",
+      "datetime": "2026-10-02T21:20",
+      "original": 0,
+      "aiUsage": 0
+    },
+    {
+      "_ts": 1792435825439,
+      "title": "DeepSeek-V4.1-Flash 1017 测试实录",
+      "type": "article",
+      "datetime": "2026-10-20T02:50",
       "original": 1,
-      "aiUsage": 0,
-      "reads": 4
+      "aiUsage": 0
     }
   ],
   "weeks": [
@@ -819,7 +721,6 @@
       "s4": 64,
       "s5": 16,
       "s6": 5,
-      "s7": 0,
       "note": ""
     },
     {
@@ -842,7 +743,6 @@
       "s4": 0,
       "s5": 0,
       "s6": 10,
-      "s7": 0,
       "note": ""
     },
     {
@@ -865,7 +765,6 @@
       "s4": 0,
       "s5": 39,
       "s6": 13,
-      "s7": 0,
       "note": ""
     },
     {
@@ -888,7 +787,6 @@
       "s4": 27,
       "s5": 0,
       "s6": 13,
-      "s7": 0,
       "note": ""
     },
     {
@@ -911,8 +809,8 @@
       "s4": 0,
       "s5": 8,
       "s6": 7,
-      "s7": 0,
-      "note": ""
+      "note": "",
+      "s7": 0
     },
     {
       "_ts": 1771899743729,
@@ -934,8 +832,8 @@
       "s4": 0,
       "s5": 0,
       "s6": 1,
-      "s7": 2,
-      "note": ""
+      "note": "",
+      "s7": 2
     },
     {
       "_ts": 1771900361100,
@@ -1467,12 +1365,12 @@
       "note": ""
     },
     {
-      "_ts": 1788766019611,
+      "_ts": 1788765900299,
       "_sortTs": 1788134400000,
       "label": "2026年第36周",
       "range": "8.31 – 9.06",
       "wdate": "2026-08-31",
-      "reads": 114,
+      "reads": 112,
       "shares": 0,
       "fans": 177,
       "newfans": 0,
@@ -1480,7 +1378,7 @@
       "imgtext": 1,
       "video": 0,
       "audio": 0,
-      "s1": 14.9,
+      "s1": 14,
       "s2": 64,
       "s3": 0,
       "s4": 7,
@@ -1490,7 +1388,7 @@
       "note": ""
     },
     {
-      "_ts": 1789376591638,
+      "_ts": 1789376400191,
       "_sortTs": 1788739200000,
       "label": "2026年第37周",
       "range": "9.07 – 9.13",
@@ -1500,29 +1398,63 @@
       "fans": 179,
       "newfans": 2,
       "article": 0,
-      "imgtext": 0,
+      "imgtext": 1,
       "video": 0,
       "audio": 0,
-      "s1": 16.3,
-      "s2": 57.1,
+      "s1": 16,
+      "s2": 57,
       "s3": 0,
       "s4": 0,
       "s5": 0,
-      "s6": 9.2,
-      "s7": 17.3,
+      "s6": 9,
+      "s7": 17,
+      "note": ""
+    },
+    {
+      "_ts": 1791426459392,
+      "_sortTs": 1790553600000,
+      "label": "2026年第40周",
+      "range": "9.28 – 10.04",
+      "wdate": "2026-09-28",
+      "reads": 63,
+      "shares": 0,
+      "fans": 186,
+      "newfans": 3,
+      "article": 0,
+      "imgtext": 1,
+      "video": 0,
+      "audio": 0,
+      "s1": 34,
+      "s2": 28,
+      "s3": 0,
+      "s4": 0,
+      "s5": 11,
+      "s6": 0,
+      "s7": 15,
+      "note": ""
+    },
+    {
+      "_ts": 1793010152546,
+      "_sortTs": 1792368000000,
+      "label": "2026年第43周",
+      "range": "10.19 – 10.25",
+      "wdate": "2026-10-19",
+      "reads": 543,
+      "shares": 0,
+      "fans": 194,
+      "newfans": 8,
+      "article": 1,
+      "imgtext": 0,
+      "video": 0,
+      "audio": 0,
+      "s1": 12,
+      "s2": 77,
+      "s3": 0,
+      "s4": 0,
+      "s5": 2,
+      "s6": 6,
+      "s7": 0,
       "note": ""
     }
-  ],
-  "avatar": "",
-  "tombstones": [
-    1788694667635,
-    1788696497328,
-    1788696497342,
-    1788697928669,
-    1788698238063,
-    1788700682259,
-    1788700821526,
-    1788701876177,
-    1788705978798
   ]
 }

@@ -4,6 +4,8 @@
 
 **线上访问**：https://chenchen913.github.io/growth-log/
 
+**Cloudflare 预览**：https://growth-log-913.pages.dev/（Cloudflare Pages Direct Upload，数据仍由 Supabase 提供）
+
 ## 功能
 
 - 数据总览：累计阅读 / 分享统计、内容类型分布、AI 辅助创作占比

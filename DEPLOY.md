@@ -79,6 +79,19 @@ git push -u origin main
    https://<你的用户名>.github.io/growth-log/
    ```
 
+## 可选 · 部署到 Cloudflare Pages
+
+除了 GitHub Pages，本项目也可以部署到 Cloudflare Pages（纯静态托管，免费额度足够）：
+
+1. 已部署的预览站：<https://growth-log-913.pages.dev/>
+2. 更新方式（Direct Upload）：
+   ```bash
+   npx wrangler@4 login   # 首次需要
+   npx wrangler@4 pages deploy . --project-name growth-log-913 --branch main
+   ```
+3. 只上传静态站点文件；不要把本地临时目录（如 `new/`）一起发布。
+4. Cloudflare 只托管前端，数据同步仍由 Supabase 负责；Supabase 不可达时页面会进入离线/备份模式，这是正常兜底。
+
 ## 第五步 · 验证与迁移旧数据（2 分钟）
 
 1. 电脑浏览器打开上面的网址 → 出现「访问验证」口令门 → 输入你在第一步设置的口令 → 右上角徽标显示「已同步」即部署成功；
