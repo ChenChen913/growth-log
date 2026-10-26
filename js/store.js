@@ -10,6 +10,7 @@
    · 每次改动先写本机缓存（dirty=true），1.6s 防抖后整包推送云端
    · 启动 / 网络恢复时拉取云端整包，与本机待同步数据按 _ts 合并
    · 删除记录写入 tombstones（墓碑），防止多端合并时"复活"
+   · v3.12：云端不可用时进入降级状态，每 30s 静默重试，恢复后合并 dirty 并切回实时同步
    ═══════════════════════════════════════════════════════════════ */
 (() => {
   const cfg = window.APP_CONFIG || {};
@@ -26,6 +27,12 @@
   let renderedKey = '';      // 已渲染 payload 的指纹，用于去重避免无谓重绘
   let dataProvider = null;   // app.js 注入：读取当前文章/周报数据
   let booted = false;
+  let retryTimer = null;     // v3.12 · 云端不可用时的自动重试定时器
+  let lastRetryAt = 0;       // 上次自动重试时间（防频繁重试）
+  let degraded = false;      // 当前是否处于离线 / 备份等降级状态
+  let backupMode = false;    // 当前展示的是否为内置备份
+  let verifying = false;     // 是否正在执行口令校验 / 云端拉取（防并发）
+  const RETRY_INTERVAL = 30000;
 
   /* ─────────── 小工具 ─────────── */
   const $ = id => document.getElementById(id);
@@ -214,6 +221,9 @@
       const d = String((raw._meta && raw._meta.exportedAt) || '').slice(0, 10);
       badge('backup', '云端暂不可用 · 展示 GitHub 备份' + (d ? '（' + d + '）' : ''), '备份模式');
       toast('云端暂时连不上，已自动展示内置备份' + (d ? '（' + d + ' 数据时点）' : '') + '；云端恢复后自动回到实时同步', 'err');
+      degraded = true;
+      backupMode = true;
+      scheduleRetry(15000);
       return true;
     } catch (e) { return false; }
   }
@@ -239,6 +249,8 @@
         showGate('口令已失效，请重新输入');
       } else {
         badge('err', '离线 · 改动已暂存，联网后自动同步', '离线待同步');
+        degraded = true;
+        scheduleRetry();
       }
     }
   }
@@ -295,8 +307,11 @@
   }
 
   async function tryVerify(code, silent) {
+    if (verifying) return false;
+    verifying = true;
     currentPasscode = code;
-    badge('busy', '正在连接云端…', '连接中…');
+    /* 静默重试时不闪「连接中」：降级状态下保留用户当前看到的离线/备份提示 */
+    if (!degraded) badge('busy', '正在连接云端…', '连接中…');
     try {
       const remote = normalize(await pull());
       localStorage.setItem(LS.passcode, code);
@@ -307,24 +322,35 @@
         payload = mergePayload(remote, cached.payload);
         writeCache(payload, true);
         refreshNow(payload);
+        badge('busy', '同步中…', '同步中…');
         schedulePush(300);
       } else {
         writeCache(remote, false);
         refreshNow(remote);
         badge('ok', '已同步 · ' + timeHM(), '已同步 ' + timeHM());
       }
+      clearRetry();
+      backupMode = false;
+      if (degraded) {
+        degraded = false;
+        toast('云端已恢复，已切回实时同步', 'ok');
+      }
       return true;
     } catch (e) {
       if (e.code === 'ACCESS_DENIED') {
         currentPasscode = null;
         localStorage.removeItem(LS.passcode);
+        clearRetry();
+        degraded = false;
         if (!silent) showGate('口令不正确，请重试'); else showGate('');
         badge('err', '等待口令验证', '待验证');
       } else if (booted) {
-        /* 已用本机缓存完成渲染，不打断用户：保持可浏览，联网后自动补同步。
+        /* 已用本机缓存完成渲染，不打断用户：保持可浏览，后台自动重试。
            注意：不清空 currentPasscode —— 口令本就有效，只是网络不通，
            保留它才能让离线期间的改动在联网后正常补传。 */
-        badge('err', '离线 · 正在显示缓存数据', '离线浏览中');
+        degraded = true;
+        badge('err', backupMode ? '云端暂不可用 · 展示 GitHub 备份' : '离线 · 正在显示缓存数据', backupMode ? '备份模式' : '离线浏览中');
+        scheduleRetry();
       } else if (await tryBackupFallback(code)) {
         /* 云端不可达且本机无缓存 → 自动降级展示 GitHub 内置备份，数据不中断 */
       } else {
@@ -335,7 +361,32 @@
         badge('err', '云端连接失败', '连接失败');
       }
       return false;
+    } finally {
+      verifying = false;
     }
+  }
+
+  /* v3.12 · 降级自动恢复：离线 / 备份模式下每 30 秒静默重试一次，
+     成功则合并本机未同步改动、自动回到实时同步，无需用户刷新页面。
+     网络恢复（online）与切回前台时也会主动拉取一次（30 秒节流）。 */
+  function clearRetry() {
+    if (retryTimer) { clearTimeout(retryTimer); retryTimer = null; }
+  }
+  function scheduleRetry(delay) {
+    if (mode !== 'cloud' || retryTimer) return;
+    retryTimer = setTimeout(() => {
+      retryTimer = null;
+      retryCloud(true);
+    }, delay === undefined ? RETRY_INTERVAL : delay);
+  }
+  async function retryCloud(force) {
+    if (mode !== 'cloud' || !booted || !savedCode()) return false;
+    const now = Date.now();
+    if (!force && now - lastRetryAt < RETRY_INTERVAL) return false;
+    lastRetryAt = now;
+    const ok = await tryVerify(savedCode(), true);
+    if (!ok && booted && savedCode()) scheduleRetry();
+    return ok;
   }
 
   async function offlineBrowse() {
@@ -402,16 +453,19 @@
 
   /* 网络恢复 / 回到前台 → 冲洗未同步改动 */
   window.addEventListener('online', () => {
-    if (mode === 'cloud' && booted) {
-      const c = readCache();
-      if (c && c.dirty) schedulePush(800);
-    }
+    if (mode !== 'cloud' || !booted) return;
+    const c = readCache();
+    if (c && c.dirty) schedulePush(800);
+    /* v3.12 · 网络恢复不仅补传，也主动拉取一次云端并复核口令；
+       有未同步改动时由 tryVerify 内部合并后再回传。 */
+    if (savedCode()) retryCloud(true);
   });
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && mode === 'cloud' && booted) {
-      const c = readCache();
-      if (c && c.dirty) schedulePush(600);
-    }
+    if (document.hidden || mode !== 'cloud' || !booted) return;
+    const c = readCache();
+    if (c && c.dirty) schedulePush(600);
+    /* 回到前台时轻量刷新一次云端数据（30 秒节流），多端改动能及时出现 */
+    if (savedCode()) retryCloud(false);
   });
 
   /* ─────────── 对 app.js 暴露的接口 ─────────── */

@@ -1,7 +1,7 @@
 # LESSONS · 开发踩坑手册与协作经验（内部文档）
 
 > 这份文档不是产品说明书。README 讲「怎么用」，这份讲「我们踩过什么坑、为什么这么设计、下次怎么避」。
-> 它是项目从 v1 单文件演进到 v3.11 的全部实战经验沉淀，写给未来的维护者（包括人类和 AI 助手）。
+> 它是项目从 v1 单文件演进到 v3.12 的全部实战经验沉淀，写给未来的维护者（包括人类和 AI 助手）。
 > **安全约定：本文件不含访问口令、GitHub token、Supabase 密钥。涉及凭据处一律以「见 config.js」「用户私有」代替。**
 
 ---
@@ -42,6 +42,7 @@ UI 操作 → 内存 state → localStorage(glog_cache, 含 dirty 标记) → �
                                                         ↘ 断网时暂存，online/visibilitychange 自动补传
 启动时：localStorage 缓存优先秒显 → 云端 pull → 内容指纹(renderedKey)比对 → 有变化才重绘
 云端不可达兜底：fetch('./backups/latest-cloud.json')（GitHub 内置备份）→ 只读展示
+降级自动恢复（v3.12）：每 30 秒静默重试；online / 切回前台主动拉取；成功后合并本机 dirty 并切回实时同步
 ```
 
 ### 1.3 数据四层保险（v3.10 闭环）
@@ -58,7 +59,7 @@ UI 操作 → 内存 state → localStorage(glog_cache, 含 dirty 标记) → �
 | 文件 | 职责 | 改动注意 |
 |------|------|---------|
 | `js/config.js` | 唯一配置文件（Supabase URL + key） | SW 对它**网络优先**，改它不用 bump 缓存版本 |
-| `js/store.js` | 数据层：双模式、清洗白名单、合并、墓碑、兜底 | 涉及数据结构，改动必须全链路回归 |
+| `js/store.js` | 数据层：双模式、清洗白名单、合并、墓碑、兜底、降级自动重试 | 涉及数据结构，改动必须全链路回归 |
 | `js/app.js` | UI 层：渲染、CRUD、弹窗、导出 | 渲染拼接必须走 `esc()` |
 | `sw.js` | 缓存策略核心 | 改任何应用文件都要 bump 第一屏的 `CACHE` |
 | `backups/latest-cloud.json` | 内置备份兜底数据 | 由 `scripts/backup_push.py` 自动同步更新 |
@@ -73,9 +74,9 @@ UI 操作 → 内存 state → localStorage(glog_cache, 含 dirty 标记) → �
 
 ### 铁律 1：改任何应用代码，必须 bump sw.js 的 CACHE 常量
 
-`sw.js` 第一屏 `const CACHE = 'glog-v3.11.flexfix'`。静态资源走**缓存优先**策略——不改这个字符串，老设备永远拿不到新代码，且你自己本地测试都会被旧缓存骗（详见坑 A-1）。
+`sw.js` 第一屏 `const CACHE = 'glog-v3.12.syncfix'`。静态资源走**缓存优先**策略——不改这个字符串，老设备永远拿不到新代码，且你自己本地测试都会被旧缓存骗（详见坑 A-1）。
 
-命名惯例：`glog-v{主版本}.{语义短名}`，如 `v3.8.insights`、`v3.9.cloudexport`、`v3.10.bkfall`、`v3.11.flexfix`。一个功能一个名字，方便在 DevTools Application 面板里一眼认出线上跑的是哪个版本。
+命名惯例：`glog-v{主版本}.{语义短名}`，如 `v3.8.insights`、`v3.9.cloudexport`、`v3.10.bkfall`、`v3.11.flexfix`、`v3.12.syncfix`。一个功能一个名字，方便在 DevTools Application 面板里一眼认出线上跑的是哪个版本。
 
 **例外**（不用 bump）：只改 `config.js`（SW 对它网络优先）、只改 `.md` 文档（不在 CORE 清单，不影响应用）。
 
@@ -154,6 +155,12 @@ UI 操作 → 内存 state → localStorage(glog_cache, 含 dirty 标记) → �
 
 - **现象**（设计期推演）：`backups/latest-cloud.json` 若走「缓存优先」，用户备份更新后，设备可能永远展示旧备份快照
 - **解法**：sw.js 为 `backups/latest-*` 单独写「网络优先、失败回缓存」策略。教训：**同一站点内不同资源的更新诉求可能完全相反**（应用代码要稳定、数据文件要新鲜），缓存策略要按资源语义分层，不能一刀切
+
+### A-7 降级状态必须有自动恢复路径（v3.12）
+
+- **现象**：断云 / 备份模式下，网络或 Supabase 恢复后页面不会自动重连；文案写的「恢复后自动回到实时同步」并不成立。
+- **根因**：`online` / `visibilitychange` 只处理 dirty 改动补传，没有 pull 重试；备份模式默认 `dirty=false`，更不会触发任何云端请求。
+- **解法**：进入离线 / 备份状态时启动 30 秒静默重试；`online` 与切回前台各主动拉取一次（30 秒节流）；成功后合并本机 dirty 并切回实时同步，失败不打断浏览。所有写缓存分支仍需 `res.ok` 守卫（见 A-3）。
 
 ---
 
@@ -303,6 +310,7 @@ v3.2 时 download/growth-log 混入 .git 目录（50 文件），被压缩进交
 - `builds/latest` 等 API 要带 `Authorization: token <TOKEN>`
 - 触发构建 `POST /repos/<owner>/<repo>/pages` 返回 **409 = 构建已在进行，不是错误**；最终以 `GET /builds/latest` 的 `status: built + commit hash` 为准
 - push 后轮询节奏：sleep 25~35 秒查一次，一般 10~30 秒 built
+- 若本地网络阻断 `git clone/push`，可用 Git Data API（blobs → tree → commit → update ref）做**单次原子提交**；不要用 Contents API 逐文件 PUT（会产生多个 commit、漏二进制且无法原子回滚）
 
 ### D-5 免费账户私有仓库没有 Pages（硬限制）
 
@@ -380,9 +388,17 @@ backup_push.py 初版重复推送同日数据时 HISTORY.md 追加重复行 → 
 
 空标题、重复 `_ts`（主键冲突）、字段类型（reads 应为整数或 null）、日期范围合理性、墓碑保留、特殊字符标题（顺带过 sanitize 零误伤）。v2.0 → v3.0 迁移（Task 5，87 篇/29 周报）即按此清单执行零事故。
 
+### F-7 备份恢复也要尊重墓碑（v3.12）
+
+- **现象**：从旧备份导入后，之前明确删除的记录重新出现，并被整包推回云端。
+- **根因**：`importData` 只按 `_ts` 去重，不检查 tombstones；而云端推送是整包覆盖，不经过启动时的合并流程。
+- **解法**：导入前用「当前墓碑 ∪ 备份墓碑」过滤待导入记录；备份墓碑只并入当前不存在的记录，避免误删现存数据；导入后把并集写回 `window.__GLOG_TOMB__` 再 `persist()`。
+
 ---
 
 ## 九、标准作业流程 SOP
+
+> 注（2026-10）：当前仓库的工作副本为 Windows 下的 `D:\growth-log`（线上产物副本，无 `.git` / `scripts/` / `repo-sync/`）。下面 9.1 是原 Linux 开发环境的记录；在本机发版走 D-4 的「Git Data API 单次原子提交」路径。
 
 ### 9.1 代码改动上线管线（完整八步）
 

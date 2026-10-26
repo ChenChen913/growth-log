@@ -27,13 +27,13 @@ Supabase（免费云数据库，口令校验后存取）
 5. 打开本仓库的 `sql/setup.sql`，**先做一处修改**——找到下面这一行，把 `改成你的口令` 换成你自己的访问口令（建议 8 位以上，别用生日）：
 
    ```sql
-   values (1, crypt('改成你的口令', gen_salt('bf')))
+   values (1, crypt('改成你的口令', gen_salt('bf', 12)))
    ```
 
 6. 整段复制粘贴到 SQL Editor → **Run**，显示 `Success` 即完成；
 7. 记下两个值（左侧菜单 **Project Settings → API**）：
    - **Project URL**：形如 `https://xxxxxxxx.supabase.co`
-   - **anon / public key**：一长串 `eyJ...` 开头的密钥（这是设计上可公开的密钥，放心放进前端）
+   - **publishable / anon key**：新版形如 `sb_publishable_...`，旧版为 `eyJ...` 开头的 anon key（这是设计上可公开的密钥，放心放进前端）
 
 > 💡 以后想**修改口令**：在 SQL Editor 里重新执行 `setup.sql` 中第 ② 段（改好口令）即可。
 
@@ -44,7 +44,7 @@ Supabase（免费云数据库，口令校验后存取）
 ```js
 window.APP_CONFIG = {
   SUPABASE_URL: 'https://xxxxxxxx.supabase.co',
-  SUPABASE_ANON_KEY: 'eyJhbGciOi...（你的 anon key）'
+  SUPABASE_ANON_KEY: 'sb_publishable_...（或旧版 eyJ... anon key）'
 };
 ```
 
@@ -82,7 +82,7 @@ git push -u origin main
 ## 第五步 · 验证与迁移旧数据（2 分钟）
 
 1. 电脑浏览器打开上面的网址 → 出现「访问验证」口令门 → 输入你在第一步设置的口令 → 右上角徽标显示「已同步」即部署成功；
-2. **迁移历史数据**：打开你原来的本地 `公众号日志.html` → 数据管理 →「导出 JSON 备份」→ 回到新网站 → 数据管理 →「导入历史数据」选择刚才的文件 → 数据合并进云端，手机端打开即自动可见。
+2. **迁移历史数据**：打开你原来的本地 `公众号日志.html` → 数据管理 →「导出 JSON 备份」→ 回到新网站 → 数据管理 →「导入历史数据」选择刚才的文件 → 数据合并进云端，手机端打开即自动可见（v3.12 起导入会按墓碑跳过已删除记录，不会把删掉的数据带回来）。
 
 ## 第六步 · 手机端（1 分钟）
 
@@ -113,7 +113,7 @@ GitHub Pages 的 `github.io` 域名国内通常可以直接访问（个别地区
 
 **Q：数据安全吗？**
 - 数据库两张表均启用 RLS 且收回匿名权限，anon key 无法直接读表；
-- 所有读写必须经过 RPC 函数，函数内部校验口令的 bcrypt 哈希；
+- 所有读写必须经过 RPC 函数，函数内部校验口令的 bcrypt 哈希（新部署默认成本因子 12）；
 - 口令明文不落库、不进 Git 仓库（只存在于你的 Supabase 里）；
 - 建议每隔一两个月用「导出 JSON 备份」留一份本地存档。
 

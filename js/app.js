@@ -698,13 +698,28 @@ function importData(event) {
       const cleanWeeks    = data.weeks.map(Store.sanitizeWeek).filter(Boolean);
       const existingArticleTs = new Set(articles.map(a => a._ts));
       const existingWeekTs = new Set(weeks.map(w => w._ts));
-      let addedA = 0, addedW = 0;
-      cleanArticles.forEach(a => { if (!existingArticleTs.has(a._ts)) { articles.push(a); addedA++; } });
-      cleanWeeks.forEach(w => { if (!existingWeekTs.has(w._ts)) { weeks.push(w); addedW++; } });
+      /* v3.12 · 备份恢复也要尊重墓碑：当前设备已删除的记录、
+         以及备份内标记为删除的记录，都不能因导入而复活。
+         备份里的墓碑只并入「当前不存在的记录」，避免误删现存数据。 */
+      const liveTs = new Set([...existingArticleTs, ...existingWeekTs]);
+      const tomb = new Set(window.__GLOG_TOMB__ || []);
+      (Array.isArray(data.tombstones) ? data.tombstones : []).map(Number)
+        .filter(n => isFinite(n) && n > 0)
+        .forEach(ts => { if (!liveTs.has(ts)) tomb.add(ts); });
+      let addedA = 0, addedW = 0, skipped = 0;
+      cleanArticles.forEach(a => {
+        if (tomb.has(a._ts)) { skipped++; return; }
+        if (!existingArticleTs.has(a._ts)) { existingArticleTs.add(a._ts); articles.push(a); addedA++; }
+      });
+      cleanWeeks.forEach(w => {
+        if (tomb.has(w._ts)) { skipped++; return; }
+        if (!existingWeekTs.has(w._ts)) { existingWeekTs.add(w._ts); weeks.push(w); addedW++; }
+      });
+      window.__GLOG_TOMB__ = [...tomb].slice(-300);
       if (!avatar && typeof data.avatar === 'string' && data.avatar) { avatar = data.avatar; applyAvatar(avatar); }
       persist(); renderOverview(); renderArticleTable(); renderWeekList();
       event.target.value = '';
-      Store.toast('导入成功：新增 ' + addedA + ' 篇文章，' + addedW + ' 条周报', 'ok');
+      Store.toast('导入成功：新增 ' + addedA + ' 篇文章，' + addedW + ' 条周报' + (skipped ? '；已跳过 ' + skipped + ' 条已删除记录' : ''), 'ok');
     } catch(err) { alert('解析失败：' + err.message); event.target.value = ''; }
   };
   reader.readAsText(file);

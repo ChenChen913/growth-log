@@ -18,13 +18,14 @@
 create extension if not exists pgcrypto;
 
 -- ② 设置你的访问口令（★ 把 '改成你的口令' 换掉，建议 8 位以上 ★）
+--    bcrypt 成本因子显式设为 12（PostgreSQL/pgcrypto 默认仅 6，偏低）。
 --    以后想改口令，重新运行这一段 insert ... on conflict 即可。
 create table if not exists public.app_config (
   id            int  primary key default 1,
   passcode_hash text not null
 );
 insert into public.app_config (id, passcode_hash)
-values (1, crypt('改成你的口令', gen_salt('bf')))
+values (1, crypt('改成你的口令', gen_salt('bf', 12)))
 on conflict (id) do update set passcode_hash = excluded.passcode_hash;
 
 -- ③ 数据表（单行整包存储，payload 为 JSON）
